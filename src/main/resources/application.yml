@@ -11,5 +11,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+user:
+  auth:
+    service:
+      url: http://localhost:8081/api/v1
 appDescription: "Pragma Powerup"
 appVersion: "1.0.0"
