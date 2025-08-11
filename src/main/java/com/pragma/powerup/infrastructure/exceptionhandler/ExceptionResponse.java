@@ -7,7 +7,10 @@ public enum ExceptionResponse {
     INVALID_PHONE("The provided phone number is not valid"),
     INVALID_ROLE("The specified role is invalid"),
     DOMAIN_EXCEPTION("A domain rule was violated"),
-    USER_NOT_FOUND("User not found");
+    USER_NOT_FOUND("User not found"),
+    RESTAURANT_NOT_FOUND("Restaurant not found"),
+    INVALID_OWNER("Action not allowed for this owner"),
+    INVALID_CATEGORY("The category is not valid or does not exist");
 
     private final String message;
 

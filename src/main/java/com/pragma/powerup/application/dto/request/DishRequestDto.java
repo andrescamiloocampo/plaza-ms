@@ -1,17 +1,13 @@
-package com.pragma.powerup.domain.model;
+package com.pragma.powerup.application.dto.request;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
 
 @Getter
 @Setter
-@AllArgsConstructor
-@NoArgsConstructor
-public class DishModel {
+public class DishRequestDto {
     private int id;
     private String name;
     private int categoryId;
