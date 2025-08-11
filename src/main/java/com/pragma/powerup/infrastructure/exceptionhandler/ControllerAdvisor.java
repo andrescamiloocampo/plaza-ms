@@ -60,8 +60,31 @@ public class ControllerAdvisor {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleUserNotFoundException(
-            UserNotFoundException ignoredException) {
+            UserNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.USER_NOT_FOUND.getMessage()));
+    }
+
+    @ExceptionHandler(RestaurantNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleRestaurantNotFoundException(
+            RestaurantNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.RESTAURANT_NOT_FOUND.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidOwnerException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidOwnerException(
+            InvalidOwnerException ex
+    ){
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_OWNER.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidCategoryException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidCategoryException(
+            InvalidCategoryException ex
+    ){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_CATEGORY.getMessage()));
     }
 }

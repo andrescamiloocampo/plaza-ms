@@ -11,7 +11,7 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     private final IRestaurantPersistencePort restaurantPersistencePort;
     private final IUserAuthClientPort userAuthClientPort;
 
-    public RestaurantUseCase(IRestaurantPersistencePort restaurantPersistencePort, IUserAuthClientPort userAuthClientPort){
+    public RestaurantUseCase(IRestaurantPersistencePort restaurantPersistencePort, IUserAuthClientPort userAuthClientPort) {
         this.restaurantPersistencePort = restaurantPersistencePort;
         this.userAuthClientPort = userAuthClientPort;
     }
@@ -19,7 +19,7 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     @Override
     public void saveRestaurant(RestaurantModel restaurantModel) {
 
-        UserResponseDto user = this.userAuthClientPort.getUserById(""+restaurantModel.getOwnerId());
+        UserResponseDto user = this.userAuthClientPort.getUserById("" + restaurantModel.getOwnerId());
 
         if (!"OWNER".equalsIgnoreCase(user.getRole().getName())) {
             throw new InvalidRoleException();
@@ -38,6 +38,20 @@ public class RestaurantUseCase implements IRestaurantServicePort {
         }
 
         this.restaurantPersistencePort.saveRestaurant(restaurantModel);
+    }
+
+    @Override
+    public RestaurantModel getRestaurantById(int id) {
+        try {
+            return this.restaurantPersistencePort.getRestaurantById(id);
+        } catch (RuntimeException e) {
+            throw new RestaurantNotFoundException();
+        }
+    }
+
+    @Override
+    public boolean getOwnership(int id, int ownerId) {
+        return this.restaurantPersistencePort.getOwnership(id, ownerId);
     }
 
 }
