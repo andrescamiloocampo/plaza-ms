@@ -87,4 +87,12 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_CATEGORY.getMessage()));
     }
+
+    @ExceptionHandler(InvalidPriceException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidPriceException(
+            InvalidPriceException ex
+    ){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(MESSAGE,ExceptionResponse.INVALID_PRICE.getMessage()));
+    }
 }
