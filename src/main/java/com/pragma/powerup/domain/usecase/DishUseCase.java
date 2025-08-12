@@ -1,12 +1,17 @@
 package com.pragma.powerup.domain.usecase;
 
+import com.pragma.powerup.application.dto.request.DishPartialUpdateDTO;
 import com.pragma.powerup.domain.api.IDishServicePort;
 import com.pragma.powerup.domain.exception.InvalidCategoryException;
 import com.pragma.powerup.domain.exception.InvalidOwnerException;
+import com.pragma.powerup.domain.exception.InvalidPriceException;
 import com.pragma.powerup.domain.model.DishModel;
 import com.pragma.powerup.domain.spi.ICategoryPersistencePort;
 import com.pragma.powerup.domain.spi.IDishPersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
+import com.pragma.powerup.infrastructure.exception.NoDataFoundException;
+
+import java.math.BigDecimal;
 
 public class DishUseCase implements IDishServicePort {
 
@@ -36,6 +41,22 @@ public class DishUseCase implements IDishServicePort {
         }
 
         dishPersistencePort.saveDish(dishModel);
+    }
+
+    @Override
+    public void updateDish(int id,int userId, DishPartialUpdateDTO dishPartialUpdateDTO){
+        int restaurantId = dishPersistencePort.findDishById(id).getRestaurantId();
+        boolean ownership = restaurantPersistencePort.getOwnership(restaurantId,userId);
+
+        if(!ownership){
+            throw new InvalidOwnerException();
+        }
+
+        if(dishPartialUpdateDTO.getPrice().compareTo(BigDecimal.ZERO) <= 0){
+            throw new InvalidPriceException();
+        }
+
+        dishPersistencePort.updateDish(id,dishPartialUpdateDTO);
     }
 
 }

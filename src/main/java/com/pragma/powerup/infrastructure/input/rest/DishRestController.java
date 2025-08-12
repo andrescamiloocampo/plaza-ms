@@ -1,5 +1,6 @@
 package com.pragma.powerup.infrastructure.input.rest;
 
+import com.pragma.powerup.application.dto.request.DishPartialUpdateDTO;
 import com.pragma.powerup.application.dto.request.DishRequestDto;
 import com.pragma.powerup.application.handler.impl.DishHandler;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,6 +29,20 @@ public class DishRestController {
     public ResponseEntity<Void> saveDish(@RequestBody DishRequestDto dishRequestDto, Authentication authentication){
         int userId = Integer.parseInt((String) authentication.getPrincipal());
         dishHandler.saveDish(dishRequestDto,userId);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PatchMapping("/{id}")
+    @Operation(summary = "Update dish")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Dish updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid price or bad request data"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - user is not the owner of the restaurant"),
+            @ApiResponse(responseCode = "404", description = "Dish not found")
+    })
+    public ResponseEntity<Void> updateDish(@PathVariable int id,@RequestBody DishPartialUpdateDTO dishPartialUpdateDTO, Authentication authentication){
+        int userId = Integer.parseInt((String) authentication.getPrincipal());
+        dishHandler.updateDish(id,userId,dishPartialUpdateDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
