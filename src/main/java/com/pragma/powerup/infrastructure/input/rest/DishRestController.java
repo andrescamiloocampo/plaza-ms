@@ -35,8 +35,10 @@ public class DishRestController {
     @PatchMapping("/{id}")
     @Operation(summary = "Update dish")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Dish updated", content = @Content),
-            @ApiResponse(responseCode = "400", description = "Bad request", content = @Content)
+            @ApiResponse(responseCode = "201", description = "Dish updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid price or bad request data"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - user is not the owner of the restaurant"),
+            @ApiResponse(responseCode = "404", description = "Dish not found")
     })
     public ResponseEntity<Void> updateDish(@PathVariable int id,@RequestBody DishPartialUpdateDTO dishPartialUpdateDTO, Authentication authentication){
         int userId = Integer.parseInt((String) authentication.getPrincipal());
