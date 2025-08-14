@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -13,5 +14,5 @@ public class UserResponseDto {
     private String lastname;
     private String phone;
     private LocalDate birthdate;
-    private RoleResponseDto role;
+    private List<RoleResponseDto> roles;
 }
