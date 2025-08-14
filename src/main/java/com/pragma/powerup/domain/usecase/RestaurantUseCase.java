@@ -21,7 +21,7 @@ public class RestaurantUseCase implements IRestaurantServicePort {
 
         UserResponseDto user = this.userAuthClientPort.getUserById("" + restaurantModel.getOwnerId());
 
-        if (!"OWNER".equalsIgnoreCase(user.getRole().getName())) {
+        if (user.getRoles().stream().noneMatch(role -> role.getName().equals("OWNER"))) {
             throw new InvalidRoleException();
         }
 

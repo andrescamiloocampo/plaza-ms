@@ -9,7 +9,6 @@ import com.pragma.powerup.domain.model.DishModel;
 import com.pragma.powerup.domain.spi.ICategoryPersistencePort;
 import com.pragma.powerup.domain.spi.IDishPersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
-import com.pragma.powerup.infrastructure.exception.NoDataFoundException;
 
 import java.math.BigDecimal;
 
