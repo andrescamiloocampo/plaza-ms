@@ -58,4 +58,16 @@ public class DishUseCase implements IDishServicePort {
         dishPersistencePort.updateDish(id,dishPartialUpdateDTO);
     }
 
+    @Override
+    public void updateDishState(int id,int userId,boolean state) {
+        int restaurantId = dishPersistencePort.findDishById(id).getRestaurantId();
+        boolean ownership = restaurantPersistencePort.getOwnership(restaurantId,userId);
+
+        if(!ownership){
+            throw new InvalidOwnerException();
+        }
+
+        dishPersistencePort.updateDishState(id,state);
+    }
+
 }

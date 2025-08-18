@@ -26,4 +26,9 @@ public class DishHandler implements IDishHandler {
     public void updateDish(int id,int userId, DishPartialUpdateDTO dishPartialUpdateDTO){
         dishServicePort.updateDish(id,userId, dishPartialUpdateDTO);
     }
+
+    @Override
+    public void updateDishState(int id, int userId, boolean state) {
+     dishServicePort.updateDishState(id,userId,state);
+    }
 }
