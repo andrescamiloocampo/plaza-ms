@@ -32,7 +32,7 @@ public class DishRestController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     @Operation(summary = "Update dish")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Dish updated successfully"),
@@ -43,6 +43,19 @@ public class DishRestController {
     public ResponseEntity<Void> updateDish(@PathVariable int id,@RequestBody DishPartialUpdateDTO dishPartialUpdateDTO, Authentication authentication){
         int userId = Integer.parseInt((String) authentication.getPrincipal());
         dishHandler.updateDish(id,userId,dishPartialUpdateDTO);
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PatchMapping("/{id}/{state}")
+    @Operation(summary = "Update dish state")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Dish state updated successfully"),
+            @ApiResponse(responseCode = "403", description = "Forbidden - invalid ownership or invalid role"),
+            @ApiResponse(responseCode = "404", description = "Dish not found")
+    })
+    public ResponseEntity<Void> updateDishState(@PathVariable int id, @PathVariable boolean state, Authentication authentication){
+        int userId = Integer.parseInt((String) authentication.getPrincipal());
+        dishHandler.updateDishState(id,userId,state);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 

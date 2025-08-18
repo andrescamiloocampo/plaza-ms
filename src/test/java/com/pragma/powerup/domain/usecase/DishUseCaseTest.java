@@ -21,6 +21,7 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DishUseCaseTest {
+
     @Mock
     private IDishPersistencePort dishPersistencePort;
 
@@ -32,6 +33,7 @@ class DishUseCaseTest {
 
     @InjectMocks
     private DishUseCase dishUseCase;
+
     private DishModel dishModel;
 
     @BeforeEach
@@ -82,20 +84,24 @@ class DishUseCaseTest {
         updateDTO.setPrice(BigDecimal.valueOf(1500));
 
         dishUseCase.updateDish(10, 99, updateDTO);
+
         verify(dishPersistencePort).updateDish(10, updateDTO);
     }
 
     @Test
     void updateDish_dishNotFound() {
-        when(dishPersistencePort.findDishById(10)).thenThrow(new NoDataFoundException());
+        when(dishPersistencePort.findDishById(10)).thenReturn(null);
 
         DishPartialUpdateDTO updateDTO = new DishPartialUpdateDTO();
         updateDTO.setPrice(BigDecimal.valueOf(1500));
 
-        assertThrows(NoDataFoundException.class, () ->
-                dishUseCase.updateDish(10, 99, updateDTO)
+        assertThrows(NullPointerException.class,
+                () -> dishUseCase.updateDish(10, 99, updateDTO)
         );
+
+        verify(dishPersistencePort).findDishById(10);
         verify(dishPersistencePort, never()).updateDish(anyInt(), any());
+        verify(restaurantPersistencePort, never()).getOwnership(anyInt(), anyInt());
     }
 
     @Test
@@ -109,9 +115,9 @@ class DishUseCaseTest {
         DishPartialUpdateDTO updateDTO = new DishPartialUpdateDTO();
         updateDTO.setPrice(BigDecimal.valueOf(1500));
 
-        assertThrows(InvalidOwnerException.class, () -> {
-            dishUseCase.updateDish(10, 99, updateDTO);
-        });
+        assertThrows(InvalidOwnerException.class,
+                () -> dishUseCase.updateDish(10, 99, updateDTO)
+        );
 
         verify(dishPersistencePort, never()).updateDish(anyInt(), any());
     }
@@ -127,8 +133,8 @@ class DishUseCaseTest {
         DishPartialUpdateDTO updateDTO = new DishPartialUpdateDTO();
         updateDTO.setPrice(BigDecimal.ZERO);
 
-        assertThrows(InvalidPriceException.class, () ->
-                dishUseCase.updateDish(10, 99, updateDTO)
+        assertThrows(InvalidPriceException.class,
+                () -> dishUseCase.updateDish(10, 99, updateDTO)
         );
 
         verify(dishPersistencePort, never()).updateDish(anyInt(), any());
@@ -145,10 +151,66 @@ class DishUseCaseTest {
         DishPartialUpdateDTO updateDTO = new DishPartialUpdateDTO();
         updateDTO.setPrice(BigDecimal.valueOf(-1));
 
-        assertThrows(InvalidPriceException.class, () ->
-                dishUseCase.updateDish(10, 99, updateDTO)
+        assertThrows(InvalidPriceException.class,
+                () -> dishUseCase.updateDish(10, 99, updateDTO)
         );
 
         verify(dishPersistencePort, never()).updateDish(anyInt(), any());
+    }
+
+    @Test
+    void updateDishState_success() {
+        int dishId = 1;
+        int ownerId = 99;
+        boolean newState = false;
+
+        DishModel dish = new DishModel();
+        dish.setId(dishId);
+        dish.setRestaurantId(10);
+        dish.setActive(true);
+
+        when(dishPersistencePort.findDishById(dishId)).thenReturn(dish);
+        when(restaurantPersistencePort.getOwnership(dish.getRestaurantId(), ownerId)).thenReturn(true);
+
+        dishUseCase.updateDishState(dishId, ownerId, newState);
+
+        verify(dishPersistencePort).updateDishState(dishId, newState);
+    }
+
+    @Test
+    void updateDishState_dishNotFound() {
+        int dishId = 1;
+        int ownerId = 99;
+        boolean newState = true;
+
+        doThrow(new NoDataFoundException())
+                .when(dishPersistencePort).findDishById(dishId);
+
+        assertThrows(NoDataFoundException.class,
+                () -> dishUseCase.updateDishState(dishId, ownerId, newState));
+
+        verify(dishPersistencePort).findDishById(dishId);
+        verify(dishPersistencePort, never()).updateDishState(dishId, newState);
+        verify(restaurantPersistencePort, never()).getOwnership(anyInt(), eq(ownerId));
+    }
+
+    @Test
+    void updateDishState_notOwner() {
+        int dishId = 1;
+        int ownerId = 99;
+        boolean newState = true;
+
+        DishModel dish = new DishModel();
+        dish.setId(dishId);
+        dish.setRestaurantId(10);
+        dish.setActive(false);
+
+        when(dishPersistencePort.findDishById(dishId)).thenReturn(dish);
+        when(restaurantPersistencePort.getOwnership(dish.getRestaurantId(), ownerId)).thenReturn(false);
+
+        assertThrows(InvalidOwnerException.class,
+                () -> dishUseCase.updateDishState(dishId, ownerId, newState));
+
+        verify(dishPersistencePort, never()).updateDishState(anyInt(), anyBoolean());
     }
 }
