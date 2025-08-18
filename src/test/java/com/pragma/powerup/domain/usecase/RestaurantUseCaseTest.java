@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,7 +58,7 @@ class RestaurantUseCaseTest {
         user.setName("Carlos");
         user.setLastname("Ramírez");
         user.setPhone("+573001112233");
-        user.setRole(role);
+        user.setRoles(List.of(role));
         return user;
     }
 
@@ -75,7 +77,7 @@ class RestaurantUseCaseTest {
         UserResponseDto user = new UserResponseDto();
         RoleResponseDto role = new RoleResponseDto();
         role.setName("CLIENT");
-        user.setRole(role);
+        user.setRoles(List.of(role));
 
         when(userAuthClientPort.getUserById("5")).thenReturn(user);
 

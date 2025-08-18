@@ -5,6 +5,6 @@ import com.pragma.powerup.domain.model.DishModel;
 
 public interface IDishServicePort {
     void saveDish(DishModel dishModel, int userId);
-
     void updateDish(int id, int userId, DishPartialUpdateDTO dishPartialUpdateDTO);
+    void updateDishState(int id, int userId, boolean state);
 }
