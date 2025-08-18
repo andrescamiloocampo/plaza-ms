@@ -6,4 +6,5 @@ import com.pragma.powerup.application.dto.request.DishRequestDto;
 public interface IDishHandler {
     void saveDish(DishRequestDto dishRequestDto, int userId);
     void updateDish(int id, int userId, DishPartialUpdateDTO dishPartialUpdateDTO);
+    void updateDishState(int id, int userId, boolean state);
 }
