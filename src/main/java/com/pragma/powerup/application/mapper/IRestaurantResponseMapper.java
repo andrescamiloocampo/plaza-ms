@@ -1,5 +1,6 @@
 package com.pragma.powerup.application.mapper;
 
+import com.pragma.powerup.application.dto.response.RestaurantPartialResponseDto;
 import com.pragma.powerup.application.dto.response.RestaurantResponseDto;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import org.mapstruct.Mapper;
@@ -14,4 +15,6 @@ import java.util.List;
 public interface IRestaurantResponseMapper {
     RestaurantResponseDto toResponse(RestaurantModel restaurantModel);
     List<RestaurantResponseDto> toResponseList(List<RestaurantModel> restaurantModelList);
+    RestaurantPartialResponseDto toPartialResponse(RestaurantModel restaurantModel);
+    List<RestaurantPartialResponseDto> toPartialResponseList(List<RestaurantModel> restaurantModelList);
 }
