@@ -11,7 +11,8 @@ public enum ExceptionResponse {
     RESTAURANT_NOT_FOUND("Restaurant not found"),
     INVALID_OWNER("Action not allowed for this owner"),
     INVALID_CATEGORY("The category is not valid or does not exist"),
-    INVALID_PRICE("The price cannot be less than or equal to zero");
+    INVALID_PRICE("The price cannot be less than or equal to zero"),
+    ILLEGAL_ARGUMENT("Illegal arguments provided");
 
     private final String message;
 

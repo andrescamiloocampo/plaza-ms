@@ -7,6 +7,8 @@ import com.pragma.powerup.domain.model.RestaurantModel;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 import com.pragma.powerup.domain.spi.IUserAuthClientPort;
 
+import java.util.List;
+
 public class RestaurantUseCase implements IRestaurantServicePort {
     private final IRestaurantPersistencePort restaurantPersistencePort;
     private final IUserAuthClientPort userAuthClientPort;
@@ -42,16 +44,25 @@ public class RestaurantUseCase implements IRestaurantServicePort {
 
     @Override
     public RestaurantModel getRestaurantById(int id) {
-        try {
-            return this.restaurantPersistencePort.getRestaurantById(id);
-        } catch (RuntimeException e) {
-            throw new RestaurantNotFoundException();
+        return restaurantPersistencePort.getRestaurantById(id);
+    }
+
+    @Override
+    public List<RestaurantModel> getRestaurants(int page, int size) {
+        if (page < 0) {
+            throw new IllegalArgumentException();
         }
+
+        if (size <= 0) {
+            throw new IllegalArgumentException();
+        }
+
+        return restaurantPersistencePort.getRestaurants(page, size);
     }
 
     @Override
     public boolean getOwnership(int id, int ownerId) {
-        return this.restaurantPersistencePort.getOwnership(id, ownerId);
+        return restaurantPersistencePort.getOwnership(id, ownerId);
     }
 
 }
