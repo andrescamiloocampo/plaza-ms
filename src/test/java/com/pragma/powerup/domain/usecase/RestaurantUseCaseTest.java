@@ -14,10 +14,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -46,6 +46,23 @@ class RestaurantUseCaseTest {
                 "+573001234567",
                 "Cra 123",
                 "900123456"
+        );
+    }
+
+    private List<RestaurantModel> getRestaurants() {
+        return List.of(
+                new RestaurantModel(1, "La Parrilla Gourmet 4",
+                        "Carrera 45 #12-34, Bogotá, Colombia",
+                        7,
+                        "3109876523",
+                        "https://example.com/logos/la-parrilla-gourmet.png",
+                        "901234518"),
+                new RestaurantModel(2, "Burguer King",
+                        "Carrera 22 #15-34, Medellin, Colombia",
+                        5,
+                        "3109876512",
+                        "https://example.com/logos/burguer-king.png",
+                        "901234184")
         );
     }
 
@@ -116,6 +133,40 @@ class RestaurantUseCaseTest {
 
         assertThrows(InvalidNameException.class, () -> restaurantUseCase.saveRestaurant(restaurant));
         verify(restaurantPersistencePort, never()).saveRestaurant(any());
+    }
+
+    @Test
+    void getRestaurants_ShouldReturnRestaurants_WhenDataExists() {
+        List<RestaurantModel> restaurants = getRestaurants();
+        when(restaurantPersistencePort.getRestaurants(0,2)).thenReturn(restaurants);
+        List<RestaurantModel> result = restaurantUseCase.getRestaurants(0,2);
+
+        assertEquals(2,result.size());
+        assertEquals("La Parrilla Gourmet 4",result.get(0).getName());
+        verify(restaurantPersistencePort).getRestaurants(0,2);
+    }
+
+    @Test
+    void getRestaurants_ShouldReturnEmptyList_WhenNoDataExists() {
+        when(restaurantPersistencePort.getRestaurants(1,5)).thenReturn(Collections.emptyList());
+        List<RestaurantModel> result = restaurantUseCase.getRestaurants(1,5);
+        assertTrue(result.isEmpty());
+        verify(restaurantPersistencePort).getRestaurants(1,5);
+    }
+
+    @Test
+    void getRestaurants_ShouldThrowException_WhenPageIsNegative() {
+        assertThrows(IllegalArgumentException.class, () -> restaurantUseCase.getRestaurants(-1,5));
+    }
+
+    @Test
+    void getRestaurants_ShouldThrowException_WhenSizeIsZero() {
+        assertThrows(IllegalArgumentException.class, () -> restaurantUseCase.getRestaurants(0,0));
+    }
+
+    @Test
+    void getRestaurants_ShouldThrowException_WhenSizeIsNegative() {
+        assertThrows(IllegalArgumentException.class, () -> restaurantUseCase.getRestaurants(0,-5));
     }
 
 }
