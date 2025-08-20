@@ -1,6 +1,7 @@
 package com.pragma.powerup.infrastructure.input.rest;
 
 import com.pragma.powerup.application.dto.request.RestaurantRequestDto;
+import com.pragma.powerup.application.dto.response.RestaurantPartialResponseDto;
 import com.pragma.powerup.application.dto.response.RestaurantResponseDto;
 import com.pragma.powerup.application.handler.IRestaurantHandler;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,11 +14,24 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/v1/restaurant")
+@RequestMapping("/api/v1/restaurants")
 @AllArgsConstructor
 public class RestaurantRestController {
     private final IRestaurantHandler restaurantHandler;
+
+    @Operation(summary = "Get restaurants")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Restaurants found", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden authentication required", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Illegal request params provided", content = @Content)
+    })
+    @GetMapping
+    public ResponseEntity<List<RestaurantPartialResponseDto>> getRestaurants(@RequestParam(name = "page") int page, @RequestParam(name = "size") int size) {
+        return ResponseEntity.ok(restaurantHandler.getRestaurants(page, size));
+    }
 
     @Operation(summary = "Create restaurant")
     @ApiResponses(value = {
@@ -55,13 +69,13 @@ public class RestaurantRestController {
     })
     @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('OWNER')")
     @GetMapping("/ownership")
-    public ResponseEntity<Boolean> getOwnership(@RequestParam int id, @RequestParam int ownerId){
-        return ResponseEntity.ok(restaurantHandler.getOwnership(id,ownerId));
+    public ResponseEntity<Boolean> getOwnership(@RequestParam int id, @RequestParam int ownerId) {
+        return ResponseEntity.ok(restaurantHandler.getOwnership(id, ownerId));
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")
     @GetMapping("/admin_access")
-    public String isOwner(){
+    public String isOwner() {
         return "Yes indeed";
     }
 }
