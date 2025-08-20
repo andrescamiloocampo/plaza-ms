@@ -11,6 +11,7 @@ import com.pragma.powerup.domain.spi.IDishPersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantPersistencePort;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class DishUseCase implements IDishServicePort {
 
@@ -27,9 +28,14 @@ public class DishUseCase implements IDishServicePort {
     }
 
     @Override
+    public List<DishModel> getDishes(int restaurantId,int page, int size, String category){
+        return dishPersistencePort.getDishes(restaurantId,page,size,category);
+    }
+
+    @Override
     public void saveDish(DishModel dishModel, int userId) {
         boolean ownership = restaurantPersistencePort.getOwnership(dishModel.getRestaurantId(), userId);
-        boolean isValidCategory = categoryPersistencePort.existsById(dishModel.getCategoryId());
+        boolean isValidCategory = categoryPersistencePort.existsById(dishModel.getCategory().getId());
 
         if (!ownership) {
             throw new InvalidOwnerException();
