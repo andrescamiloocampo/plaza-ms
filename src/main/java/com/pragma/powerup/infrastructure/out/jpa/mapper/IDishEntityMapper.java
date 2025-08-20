@@ -1,5 +1,6 @@
 package com.pragma.powerup.infrastructure.out.jpa.mapper;
 
+import com.pragma.powerup.domain.model.CategoryModel;
 import com.pragma.powerup.domain.model.DishModel;
 import com.pragma.powerup.infrastructure.out.jpa.entity.CategoryEntity;
 import com.pragma.powerup.infrastructure.out.jpa.entity.DishEntity;
@@ -13,20 +14,20 @@ import java.util.List;
 @Mapper(componentModel = "spring", unmappedSourcePolicy = ReportingPolicy.IGNORE, unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface IDishEntityMapper {
 
-    @Mapping(target = "category", expression = "java(mapCategory(dishModel.getCategoryId()))")
+    @Mapping(target = "category", expression = "java(mapCategory(dishModel.getCategory()))")
     @Mapping(target = "restaurant", expression = "java(mapRestaurant(dishModel.getRestaurantId()))")
     DishEntity toEntity(DishModel dishModel);
 
-    @Mapping(target = "categoryId", source = "category.id")
+    @Mapping(target = "category", source = "category")
     @Mapping(target = "restaurantId", source = "restaurant.id")
     DishModel toDishModel(DishEntity dishEntity);
 
     List<DishModel> toDishModelList(List<DishEntity> dishEntities);
 
-    default CategoryEntity mapCategory(int categoryId) {
-        if (categoryId == 0) return null;
+    default CategoryEntity mapCategory(CategoryModel categoryModel) {
+        if (categoryModel == null) return null;
         CategoryEntity category = new CategoryEntity();
-        category.setId(categoryId);
+        category.setId(categoryModel.getId());
         return category;
     }
 
