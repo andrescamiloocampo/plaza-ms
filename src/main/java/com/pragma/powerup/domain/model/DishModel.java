@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 public class DishModel {
     private int id;
     private String name;
-    private int categoryId;
+    private CategoryModel category;
     private String description;
     private BigDecimal price;
     private String imageUrl;

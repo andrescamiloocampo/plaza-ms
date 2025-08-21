@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 public class DishResponseDto {
     private int id;
     private String name;
-    private int categoryId;
+    private CategoryResponseDto category;
     private String description;
     private BigDecimal price;
     private String imageUrl;

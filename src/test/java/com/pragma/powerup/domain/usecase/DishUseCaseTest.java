@@ -4,6 +4,7 @@ import com.pragma.powerup.application.dto.request.DishPartialUpdateDTO;
 import com.pragma.powerup.domain.exception.InvalidCategoryException;
 import com.pragma.powerup.domain.exception.InvalidOwnerException;
 import com.pragma.powerup.domain.exception.InvalidPriceException;
+import com.pragma.powerup.domain.model.CategoryModel;
 import com.pragma.powerup.domain.model.DishModel;
 import com.pragma.powerup.domain.spi.ICategoryPersistencePort;
 import com.pragma.powerup.domain.spi.IDishPersistencePort;
@@ -16,6 +17,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,9 +42,10 @@ class DishUseCaseTest {
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
+        CategoryModel categoryModel = new CategoryModel(1,"Seafood","sea food");
         dishModel = new DishModel();
         dishModel.setRestaurantId(1);
-        dishModel.setCategoryId(2);
+        dishModel.setCategory(categoryModel);
     }
 
     @Test
@@ -213,4 +217,17 @@ class DishUseCaseTest {
 
         verify(dishPersistencePort, never()).updateDishState(anyInt(), anyBoolean());
     }
+
+    @Test
+    void getDishes_invalidPage_shouldFail(){
+        assertThrows(IllegalArgumentException.class,
+                () -> dishUseCase.getDishes(1,-1,10,""));
+    }
+
+    @Test
+    void getDishes_invalidSize_shouldFail() {
+        assertThrows(IllegalArgumentException.class,
+                () -> dishUseCase.getDishes(1, 0, 0, ""));
+    }
+
 }

@@ -34,7 +34,7 @@ public class DishEntity {
     @Column(name = "active", nullable = false)
     private boolean active;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id",nullable = false)
     private CategoryEntity category;
 
