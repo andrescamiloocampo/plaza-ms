@@ -29,6 +29,12 @@ public class DishUseCase implements IDishServicePort {
 
     @Override
     public List<DishModel> getDishes(int restaurantId,int page, int size, String category){
+        if(page < 0){
+            throw new IllegalArgumentException();
+        }
+        if(size <= 0){
+            throw new IllegalArgumentException();
+        }
         return dishPersistencePort.getDishes(restaurantId,page,size,category);
     }
 
