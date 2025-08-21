@@ -2,6 +2,7 @@ package com.pragma.powerup.infrastructure.input.rest;
 
 import com.pragma.powerup.application.dto.request.DishPartialUpdateDTO;
 import com.pragma.powerup.application.dto.request.DishRequestDto;
+import com.pragma.powerup.application.dto.response.DishResponseDto;
 import com.pragma.powerup.application.handler.impl.DishHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,8 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
-@RequestMapping("/api/v1/dish")
+@RequestMapping("/api/v1/dishes")
 @RequiredArgsConstructor
 public class DishRestController {
 
@@ -26,10 +29,25 @@ public class DishRestController {
             @ApiResponse(responseCode = "201", description = "Dish created", content = @Content),
             @ApiResponse(responseCode = "409", description = "Dish already exists", content = @Content)
     })
-    public ResponseEntity<Void> saveDish(@RequestBody DishRequestDto dishRequestDto, Authentication authentication){
+    public ResponseEntity<Void> saveDish(@RequestBody DishRequestDto dishRequestDto, Authentication authentication) {
         int userId = Integer.parseInt((String) authentication.getPrincipal());
-        dishHandler.saveDish(dishRequestDto,userId);
+        dishHandler.saveDish(dishRequestDto, userId);
         return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    @Operation(summary = "Find dishes by restaurant and category")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful petition", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Bad request, illegal arguments provided", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden authentication required", content = @Content)
+    })
+    public ResponseEntity<List<DishResponseDto>> getDishes(@RequestParam(name = "rid") int restaurantId,
+                                                           @RequestParam(name = "page", defaultValue = "0") int page,
+                                                           @RequestParam(name = "size", defaultValue = "10") int size,
+                                                           @RequestParam(name = "category", defaultValue = "", required = false) String category
+    ) {
+        return ResponseEntity.ok(dishHandler.getDishes(restaurantId, page, size, category));
     }
 
     @PutMapping("/{id}")
@@ -40,9 +58,9 @@ public class DishRestController {
             @ApiResponse(responseCode = "403", description = "Forbidden - user is not the owner of the restaurant"),
             @ApiResponse(responseCode = "404", description = "Dish not found")
     })
-    public ResponseEntity<Void> updateDish(@PathVariable int id,@RequestBody DishPartialUpdateDTO dishPartialUpdateDTO, Authentication authentication){
+    public ResponseEntity<Void> updateDish(@PathVariable int id, @RequestBody DishPartialUpdateDTO dishPartialUpdateDTO, Authentication authentication) {
         int userId = Integer.parseInt((String) authentication.getPrincipal());
-        dishHandler.updateDish(id,userId,dishPartialUpdateDTO);
+        dishHandler.updateDish(id, userId, dishPartialUpdateDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
@@ -53,15 +71,15 @@ public class DishRestController {
             @ApiResponse(responseCode = "403", description = "Forbidden - invalid ownership or invalid role"),
             @ApiResponse(responseCode = "404", description = "Dish not found")
     })
-    public ResponseEntity<Void> updateDishState(@PathVariable int id, @PathVariable boolean state, Authentication authentication){
+    public ResponseEntity<Void> updateDishState(@PathVariable int id, @PathVariable boolean state, Authentication authentication) {
         int userId = Integer.parseInt((String) authentication.getPrincipal());
-        dishHandler.updateDishState(id,userId,state);
+        dishHandler.updateDishState(id, userId, state);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping("/owner_access")
-    public ResponseEntity<String> getOwnerAccess(Authentication authentication){
+    public ResponseEntity<String> getOwnerAccess(Authentication authentication) {
         String userId = (String) authentication.getPrincipal();
-        return ResponseEntity.ok(String.format("Hello owner %s",userId));
+        return ResponseEntity.ok(String.format("Hello owner %s", userId));
     }
 }
