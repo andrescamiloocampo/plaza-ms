@@ -1,6 +1,6 @@
 package com.pragma.powerup.infrastructure.input.rest;
 
-import com.pragma.powerup.application.dto.request.DishPartialUpdateDTO;
+import com.pragma.powerup.application.dto.request.DishPartialUpdateDto;
 import com.pragma.powerup.application.dto.request.DishRequestDto;
 import com.pragma.powerup.application.dto.response.DishResponseDto;
 import com.pragma.powerup.application.handler.impl.DishHandler;
@@ -58,7 +58,7 @@ public class DishRestController {
             @ApiResponse(responseCode = "403", description = "Forbidden - user is not the owner of the restaurant"),
             @ApiResponse(responseCode = "404", description = "Dish not found")
     })
-    public ResponseEntity<Void> updateDish(@PathVariable int id, @RequestBody DishPartialUpdateDTO dishPartialUpdateDTO, Authentication authentication) {
+    public ResponseEntity<Void> updateDish(@PathVariable int id, @RequestBody DishPartialUpdateDto dishPartialUpdateDTO, Authentication authentication) {
         int userId = Integer.parseInt((String) authentication.getPrincipal());
         dishHandler.updateDish(id, userId, dishPartialUpdateDTO);
         return new ResponseEntity<>(HttpStatus.CREATED);
