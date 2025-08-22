@@ -21,7 +21,8 @@ public class BeanConfiguration {
     private final IDishRepository dishRepository;
     private final IDishEntityMapper dishEntityMapper;
     private final ICategoryRepository categoryRepository;
-
+    private final IOrderRepository orderRepository;
+    private final IOrderEntityMapper orderEntityMapper;
 
     @Bean
     public ICategoryPersistencePort categoryPersistencePort() {
@@ -39,23 +40,32 @@ public class BeanConfiguration {
     }
 
     @Bean
-    public IRestaurantPersistencePort restaurantPersistencePort(){
-        return new RestaurantJpaAdapter(restaurantRepository,restaurantEntityMapper);
+    public IRestaurantPersistencePort restaurantPersistencePort() {
+        return new RestaurantJpaAdapter(restaurantRepository, restaurantEntityMapper);
     }
 
     @Bean
-    public IRestaurantServicePort restaurantServicePort(){
-        return new RestaurantUseCase(restaurantPersistencePort(),userAuthClientPort);
+    public IRestaurantServicePort restaurantServicePort() {
+        return new RestaurantUseCase(restaurantPersistencePort(), userAuthClientPort);
     }
 
     @Bean
-    public IDishPersistencePort dishPersistencePort(){
-        return new DishJpaAdapter(dishRepository,dishEntityMapper);
+    public IDishPersistencePort dishPersistencePort() {
+        return new DishJpaAdapter(dishRepository, dishEntityMapper);
     }
 
     @Bean
-    public IDishServicePort dishServicePort(){
-        return new DishUseCase(dishPersistencePort(),restaurantPersistencePort(),categoryPersistencePort());
+    public IDishServicePort dishServicePort() {
+        return new DishUseCase(dishPersistencePort(), restaurantPersistencePort(), categoryPersistencePort());
     }
 
+    @Bean
+    public IOrderPersistencePort orderPersistencePort() {
+        return new OrderJpaAdapter(orderRepository, orderEntityMapper);
+    }
+
+    @Bean
+    public IOrderServicePort orderServicePort() {
+        return new OrderUseCase(orderPersistencePort());
+    }
 }
