@@ -1,6 +1,6 @@
 package com.pragma.powerup.domain.usecase;
 
-import com.pragma.powerup.application.dto.request.DishPartialUpdateDTO;
+import com.pragma.powerup.application.dto.request.DishPartialUpdateDto;
 import com.pragma.powerup.domain.api.IDishServicePort;
 import com.pragma.powerup.domain.exception.InvalidCategoryException;
 import com.pragma.powerup.domain.exception.InvalidOwnerException;
@@ -55,7 +55,7 @@ public class DishUseCase implements IDishServicePort {
     }
 
     @Override
-    public void updateDish(int id,int userId, DishPartialUpdateDTO dishPartialUpdateDTO){
+    public void updateDish(int id,int userId, DishPartialUpdateDto dishPartialUpdateDTO){
         int restaurantId = dishPersistencePort.findDishById(id).getRestaurantId();
         boolean ownership = restaurantPersistencePort.getOwnership(restaurantId,userId);
 

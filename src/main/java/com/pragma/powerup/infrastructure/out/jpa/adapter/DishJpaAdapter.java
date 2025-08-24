@@ -1,6 +1,6 @@
 package com.pragma.powerup.infrastructure.out.jpa.adapter;
 
-import com.pragma.powerup.application.dto.request.DishPartialUpdateDTO;
+import com.pragma.powerup.application.dto.request.DishPartialUpdateDto;
 import com.pragma.powerup.domain.model.DishModel;
 import com.pragma.powerup.domain.spi.IDishPersistencePort;
 import com.pragma.powerup.infrastructure.exception.NoDataFoundException;
@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
-import java.util.Locale;
 
 @RequiredArgsConstructor
 public class DishJpaAdapter implements IDishPersistencePort {
@@ -28,7 +27,7 @@ public class DishJpaAdapter implements IDishPersistencePort {
     }
 
     @Override
-    public void updateDish(int id, DishPartialUpdateDTO dishPartialUpdateDTO) {
+    public void updateDish(int id, DishPartialUpdateDto dishPartialUpdateDTO) {
         DishModel dishModel = dishEntityMapper.toDishModel(dishRepository.findById(id).orElseThrow(NoDataFoundException::new));
         if (dishModel != null) {
             if (dishPartialUpdateDTO.getDescription() != null) {

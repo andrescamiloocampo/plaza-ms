@@ -103,4 +103,12 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(MESSAGE,ExceptionResponse.ILLEGAL_ARGUMENT.getMessage()));
     }
+
+    @ExceptionHandler(OrderInProcessException.class)
+    public ResponseEntity<Map<String, String>> handleOrderInProcessException(
+            OrderInProcessException ex
+    ){
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(Collections.singletonMap(MESSAGE,ExceptionResponse.ORDER_IN_PROCESS.getMessage()));
+    }
 }

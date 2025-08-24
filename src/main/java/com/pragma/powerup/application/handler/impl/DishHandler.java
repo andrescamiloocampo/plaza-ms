@@ -1,6 +1,6 @@
 package com.pragma.powerup.application.handler.impl;
 
-import com.pragma.powerup.application.dto.request.DishPartialUpdateDTO;
+import com.pragma.powerup.application.dto.request.DishPartialUpdateDto;
 import com.pragma.powerup.application.dto.request.DishRequestDto;
 import com.pragma.powerup.application.dto.response.DishResponseDto;
 import com.pragma.powerup.application.handler.IDishHandler;
@@ -28,7 +28,7 @@ public class DishHandler implements IDishHandler {
     }
 
     @Override
-    public void updateDish(int id, int userId, DishPartialUpdateDTO dishPartialUpdateDTO) {
+    public void updateDish(int id, int userId, DishPartialUpdateDto dishPartialUpdateDTO) {
         dishServicePort.updateDish(id, userId, dishPartialUpdateDTO);
     }
 
