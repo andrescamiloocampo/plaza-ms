@@ -1,6 +1,5 @@
 package com.pragma.powerup.infrastructure.out.jpa.entity;
 
-import com.pragma.powerup.domain.model.RestaurantModel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,6 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -20,8 +20,8 @@ public class OrderEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "customerId", nullable = false)
-    private int customerId;
+    @Column(name = "userId", nullable = false)
+    private int userId;
 
     @Column(name = "date", nullable = false)
     private LocalDateTime date;
@@ -29,10 +29,13 @@ public class OrderEntity {
     @Column(name = "state", nullable = false)
     private String state;
 
-    @Column(name = "chefId", nullable = false)
+    @Column(name = "chefId")
     private int chefId;
 
     @ManyToOne
     @JoinColumn(name = "restaurantId",nullable = false)
     private RestaurantEntity restaurant;
+
+    @OneToMany(mappedBy = "order",cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderDishEntity> orderDishes;
 }

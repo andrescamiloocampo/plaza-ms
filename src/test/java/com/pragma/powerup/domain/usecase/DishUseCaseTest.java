@@ -1,6 +1,6 @@
 package com.pragma.powerup.domain.usecase;
 
-import com.pragma.powerup.application.dto.request.DishPartialUpdateDTO;
+import com.pragma.powerup.application.dto.request.DishPartialUpdateDto;
 import com.pragma.powerup.domain.exception.InvalidCategoryException;
 import com.pragma.powerup.domain.exception.InvalidOwnerException;
 import com.pragma.powerup.domain.exception.InvalidPriceException;
@@ -17,8 +17,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -51,7 +49,7 @@ class DishUseCaseTest {
     @Test
     void saveDish_success() {
         when(restaurantPersistencePort.getOwnership(1, 99)).thenReturn(true);
-        when(categoryPersistencePort.existsById(2)).thenReturn(true);
+        when(categoryPersistencePort.existsById(dishModel.getCategory().getId())).thenReturn(true);
 
         dishUseCase.saveDish(dishModel, 99);
 
@@ -83,7 +81,7 @@ class DishUseCaseTest {
         when(dishPersistencePort.findDishById(10)).thenReturn(existingDish);
         when(restaurantPersistencePort.getOwnership(1, 99)).thenReturn(true);
 
-        DishPartialUpdateDTO updateDTO = new DishPartialUpdateDTO();
+        DishPartialUpdateDto updateDTO = new DishPartialUpdateDto();
         updateDTO.setDescription("New description");
         updateDTO.setPrice(BigDecimal.valueOf(1500));
 
@@ -96,7 +94,7 @@ class DishUseCaseTest {
     void updateDish_dishNotFound() {
         when(dishPersistencePort.findDishById(10)).thenReturn(null);
 
-        DishPartialUpdateDTO updateDTO = new DishPartialUpdateDTO();
+        DishPartialUpdateDto updateDTO = new DishPartialUpdateDto();
         updateDTO.setPrice(BigDecimal.valueOf(1500));
 
         assertThrows(NullPointerException.class,
@@ -116,7 +114,7 @@ class DishUseCaseTest {
         when(dishPersistencePort.findDishById(10)).thenReturn(existingDish);
         when(restaurantPersistencePort.getOwnership(1, 99)).thenReturn(false);
 
-        DishPartialUpdateDTO updateDTO = new DishPartialUpdateDTO();
+        DishPartialUpdateDto updateDTO = new DishPartialUpdateDto();
         updateDTO.setPrice(BigDecimal.valueOf(1500));
 
         assertThrows(InvalidOwnerException.class,
@@ -134,7 +132,7 @@ class DishUseCaseTest {
         when(dishPersistencePort.findDishById(10)).thenReturn(existingDish);
         when(restaurantPersistencePort.getOwnership(1, 99)).thenReturn(true);
 
-        DishPartialUpdateDTO updateDTO = new DishPartialUpdateDTO();
+        DishPartialUpdateDto updateDTO = new DishPartialUpdateDto();
         updateDTO.setPrice(BigDecimal.ZERO);
 
         assertThrows(InvalidPriceException.class,
@@ -152,7 +150,7 @@ class DishUseCaseTest {
         when(dishPersistencePort.findDishById(10)).thenReturn(existingDish);
         when(restaurantPersistencePort.getOwnership(1, 99)).thenReturn(true);
 
-        DishPartialUpdateDTO updateDTO = new DishPartialUpdateDTO();
+        DishPartialUpdateDto updateDTO = new DishPartialUpdateDto();
         updateDTO.setPrice(BigDecimal.valueOf(-1));
 
         assertThrows(InvalidPriceException.class,
