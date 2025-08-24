@@ -28,7 +28,7 @@ public interface IOrderEntityMapper {
     @Mapping(target = "state", source = "state")
     @Mapping(target = "chefId", source = "chefId")
     @Mapping(target = "restaurant", source = "restaurantId", qualifiedByName = "createRestaurantWithId")
-    @Mapping(target = "orderDishes", ignore = true) // Ignoramos aquí y manejamos manualmente
+    @Mapping(target = "orderDishes", ignore = true)
     OrderEntity toEntity(OrderModel orderModel);
 
     @Mapping(target = "id", source = "id")

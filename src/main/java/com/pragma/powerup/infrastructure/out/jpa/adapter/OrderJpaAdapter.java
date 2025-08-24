@@ -16,4 +16,12 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
     public void makeOrder(OrderModel orderModel) {
         orderRepository.save(orderEntityMapper.toEntityWithRelations(orderModel));
     }
+
+    @Override
+    public OrderModel getOrderByUserId(int id) {
+        return orderRepository
+                .findTopByUserIdOrderByDateDesc(id)
+                .map(orderEntityMapper::toModel)
+                .orElse(null);
+    }
 }

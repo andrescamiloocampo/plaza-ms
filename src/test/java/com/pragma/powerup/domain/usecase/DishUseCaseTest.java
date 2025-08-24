@@ -49,7 +49,7 @@ class DishUseCaseTest {
     @Test
     void saveDish_success() {
         when(restaurantPersistencePort.getOwnership(1, 99)).thenReturn(true);
-        when(categoryPersistencePort.existsById(2)).thenReturn(true);
+        when(categoryPersistencePort.existsById(dishModel.getCategory().getId())).thenReturn(true);
 
         dishUseCase.saveDish(dishModel, 99);
 
