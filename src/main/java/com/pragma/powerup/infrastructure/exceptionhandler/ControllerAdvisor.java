@@ -111,4 +111,12 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(Collections.singletonMap(MESSAGE,ExceptionResponse.ORDER_IN_PROCESS.getMessage()));
     }
+
+    @ExceptionHandler(InvalidUserException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidUserException(
+            InvalidUserException ex
+    ){
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Collections.singletonMap(MESSAGE,ExceptionResponse.INVALID_USER.getMessage()));
+    }
 }

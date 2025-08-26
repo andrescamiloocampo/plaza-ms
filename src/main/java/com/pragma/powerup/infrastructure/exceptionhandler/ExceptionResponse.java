@@ -13,7 +13,8 @@ public enum ExceptionResponse {
     INVALID_CATEGORY("The category is not valid or does not exist"),
     INVALID_PRICE("The price cannot be less than or equal to zero"),
     ILLEGAL_ARGUMENT("Illegal arguments provided"),
-    ORDER_IN_PROCESS("The user already has orders in process");
+    ORDER_IN_PROCESS("The user already has orders in process"),
+    INVALID_USER("This action is not allowed for this user");
 
     private final String message;
 
