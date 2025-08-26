@@ -4,6 +4,7 @@ import com.pragma.powerup.application.dto.request.RestaurantRequestDto;
 import com.pragma.powerup.application.dto.response.RestaurantPartialResponseDto;
 import com.pragma.powerup.application.dto.response.RestaurantResponseDto;
 import com.pragma.powerup.application.handler.IRestaurantHandler;
+import com.pragma.powerup.application.mapper.response.IRestaurantResponseMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -21,6 +22,7 @@ import java.util.List;
 @AllArgsConstructor
 public class RestaurantRestController {
     private final IRestaurantHandler restaurantHandler;
+    private final IRestaurantResponseMapper restaurantResponseMapper;
 
     @Operation(summary = "Get restaurants")
     @ApiResponses(value = {
@@ -71,6 +73,19 @@ public class RestaurantRestController {
     @GetMapping("/ownership")
     public ResponseEntity<Boolean> getOwnership(@RequestParam int id, @RequestParam int ownerId) {
         return ResponseEntity.ok(restaurantHandler.getOwnership(id, ownerId));
+    }
+
+    @Operation(summary = "Get restaurant by ownerId", description = "Returns a restaurant's information given its ownerId.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Restaurant found",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "Restaurant not found",
+                    content = @Content)
+    })
+    @PreAuthorize("hasAuthority('OWNER')")
+    @GetMapping("/byOwner/{ownerId}")
+    public ResponseEntity<List<RestaurantResponseDto>> getRestaurantsByOwnerId(@PathVariable int ownerId) {
+        return ResponseEntity.ok(restaurantHandler.getRestaurantsByOwnerId(ownerId));
     }
 
     @PreAuthorize("hasAuthority('ADMIN')")

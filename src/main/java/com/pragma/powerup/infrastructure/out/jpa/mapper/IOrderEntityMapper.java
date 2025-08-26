@@ -40,6 +40,19 @@ public interface IOrderEntityMapper {
     @Mapping(target = "orderDishes", source = "orderDishes")
     OrderModel toModel(OrderEntity orderEntity);
 
+//    @Mapping(target = "id", source = "id")
+//    @Mapping(target = "userId", source = "userId")
+//    @Mapping(target = "date", source = "date")
+//    @Mapping(target = "state", source = "state")
+//    @Mapping(target = "chefId", source = "chefId")
+//    @Mapping(target = "restaurantId", source = "restaurant.id")
+//    @Mapping(target = "orderDishes", source = "orderDishes")
+//    List<OrderModel> toModelList(List<OrderEntity> orderEntities);
+
+    @Mapping(target = "restaurantId", source = "restaurant.id")
+    @Mapping(target = "orderDishes", source = "orderDishes", qualifiedByName = "toOrderDishModelList")
+    List<OrderModel> toModelList(List<OrderEntity> orderEntities);
+
     @Mapping(target = "id", source = "id")
     @Mapping(target = "userId", source = "userId")
     @Mapping(target = "order", ignore = true)
@@ -49,7 +62,7 @@ public interface IOrderEntityMapper {
 
     @Mapping(target = "id", source = "id")
     @Mapping(target = "userId", source = "userId")
-    @Mapping(target = "dish", source = "dish", qualifiedByName = "createDishModelWithId")
+    @Mapping(target = "dish", source = "dish")
     @Mapping(target = "quantity", source = "quantity")
     OrderDishModel toOrderDishModel(OrderDishEntity orderDishEntity);
 
@@ -69,13 +82,20 @@ public interface IOrderEntityMapper {
         return dish;
     }
 
-    @Named("createDishModelWithId")
-    default DishModel createDishModelWithId(DishEntity dishEntity) {
-        if (dishEntity == null) return null;
-        DishModel dish = new DishModel();
-        dish.setId(dishEntity.getId());
+    @Named("toOrderDishEntityList")
+    default List<OrderDishEntity> toOrderDishEntityList(List<OrderDishModel> orderDishModels){
+        if(orderDishModels == null) return null;
+        return orderDishModels.stream()
+                .map(this::toOrderDishEntity)
+                .collect(Collectors.toList());
+    }
 
-        return dish;
+    @Named("toOrderDishModelList")
+    default List<OrderDishModel> toOrderDishModelList(List<OrderDishEntity> orderDishEntities){
+        if(orderDishEntities == null) return null;
+        return orderDishEntities.stream()
+                .map(this::toOrderDishModel)
+                .collect(Collectors.toList());
     }
 
     default OrderEntity toEntityWithRelations(OrderModel orderModel) {

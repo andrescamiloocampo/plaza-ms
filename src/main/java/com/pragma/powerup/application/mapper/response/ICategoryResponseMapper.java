@@ -1,4 +1,4 @@
-package com.pragma.powerup.application.mapper;
+package com.pragma.powerup.application.mapper.response;
 
 import com.pragma.powerup.application.dto.response.CategoryResponseDto;
 import com.pragma.powerup.domain.model.CategoryModel;

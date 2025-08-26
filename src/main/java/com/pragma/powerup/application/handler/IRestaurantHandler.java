@@ -9,6 +9,7 @@ import java.util.List;
 public interface IRestaurantHandler {
     void saveRestaurant(RestaurantRequestDto restaurantRequestDto);
     RestaurantResponseDto getRestaurantById(int id);
+    List<RestaurantResponseDto> getRestaurantsByOwnerId(int ownerId);
     List<RestaurantPartialResponseDto> getRestaurants(int page,int size);
     boolean getOwnership(int id, int ownerId);
 }

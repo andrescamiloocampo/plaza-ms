@@ -2,9 +2,16 @@ package com.pragma.powerup.infrastructure.out.jpa.adapter;
 
 import com.pragma.powerup.domain.model.OrderModel;
 import com.pragma.powerup.domain.spi.IOrderPersistencePort;
+import com.pragma.powerup.infrastructure.out.jpa.entity.OrderEntity;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.IOrderEntityMapper;
 import com.pragma.powerup.infrastructure.out.jpa.repository.IOrderRepository;
+import com.pragma.powerup.infrastructure.out.jpa.specification.OrderSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 public class OrderJpaAdapter implements IOrderPersistencePort {
@@ -23,5 +30,12 @@ public class OrderJpaAdapter implements IOrderPersistencePort {
                 .findTopByUserIdOrderByDateDesc(id)
                 .map(orderEntityMapper::toModel)
                 .orElse(null);
+    }
+
+    @Override
+    public List<OrderModel> getOrders(int restaurantId, int page, int size, String state) {
+        Pageable pageable = PageRequest.of(page,size);
+        Specification<OrderEntity> spec = OrderSpecification.withFilters(restaurantId, state);
+        return orderEntityMapper.toModelList(orderRepository.findAll(spec, pageable).getContent());
     }
 }

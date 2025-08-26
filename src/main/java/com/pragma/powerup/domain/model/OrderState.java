@@ -1,10 +1,10 @@
 package com.pragma.powerup.domain.model;
 
 public enum OrderState {
-    PENDING("Pending"),
-    PREPARATION("Preparation"),
-    DONE("Done"),
-    DELIVERED("Delivered");
+    PENDING("PENDING"),
+    PREPARATION("PREPARATION"),
+    DONE("DONE"),
+    DELIVERED("DELIVERED");
 
     public final String label;
 

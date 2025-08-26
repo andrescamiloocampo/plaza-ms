@@ -48,6 +48,11 @@ public class RestaurantUseCase implements IRestaurantServicePort {
     }
 
     @Override
+    public List<RestaurantModel> getRestaurantByOwnerId(int ownerId) {
+        return restaurantPersistencePort.getRestaurantsByOwnerId(ownerId);
+    }
+
+    @Override
     public List<RestaurantModel> getRestaurants(int page, int size) {
         if (page < 0) {
             throw new IllegalArgumentException();
