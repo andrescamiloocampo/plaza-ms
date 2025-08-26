@@ -37,6 +37,21 @@ public class OrderRestController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @PreAuthorize("hasAuthority('EMPLOYEE')")
+    @Operation(summary = "Change order status and assign employee")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order status changed", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden authentication required", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Illegal request params provided", content = @Content)
+    })
+    @PatchMapping("/{orderId}")
+    public ResponseEntity<Void> changeOrderStatus(@PathVariable int orderId,
+                                                  Authentication authentication) {
+        int employeeId = Integer.parseInt(authentication.getPrincipal().toString());
+        orderHandler.updateOrder(orderId,employeeId);
+        return ResponseEntity.ok().build();
+    }
+
     @PreAuthorize("hasAnyAuthority('ADMIN','OWNER','EMPLOYEE')")
     @Operation(summary = "Get orders")
     @ApiResponses(value = {

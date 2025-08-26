@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface IOrderHandler {
     void makeOrder(OrderRequestDto orderRequestDto, int userId);
+    void updateOrder(int orderId, int employeeId);
     List<OrderResponseDto> getOrders(int page, int size, String state,int userId);
 }
