@@ -27,6 +27,11 @@ public class OrderHandler implements IOrderHandler {
     }
 
     @Override
+    public void updateOrder(int orderId, int employeeId) {
+        orderServicePort.updateOrder(orderId,employeeId);
+    }
+
+    @Override
     public List<OrderResponseDto> getOrders(int page, int size, String state, int userId) {
         return orderResponseMapper
                 .toResponseList(orderServicePort.getOrders(page, size, state.toUpperCase(), userId));

@@ -1,6 +1,7 @@
 package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.api.IOrderServicePort;
+import com.pragma.powerup.domain.exception.InvalidUserException;
 import com.pragma.powerup.domain.exception.OrderInProcessException;
 import com.pragma.powerup.domain.exception.UserNotFoundException;
 import com.pragma.powerup.domain.model.OrderModel;
@@ -34,6 +35,29 @@ public class OrderUseCase implements IOrderServicePort {
         order.setDate(LocalDateTime.now());
         order.setState(OrderState.PENDING.label);
         orderPersistencePort.makeOrder(order);
+    }
+
+    @Override
+    public void updateOrder(int orderId, int employeeId) {
+        RestaurantEmployeeModel employee = restaurantEmployeePersistencePort.findByUserId(employeeId);
+
+        if(employee == null){
+            throw new UserNotFoundException();
+        }
+
+        OrderModel order = orderPersistencePort.getOrderById(orderId);
+
+        if(!order.getState().equals(OrderState.PENDING.label)){
+            throw new OrderInProcessException();
+        }
+
+        if(order.getRestaurantId() != employee.getRestaurantId()){
+            throw new InvalidUserException();
+        }
+
+        order.setState(OrderState.PREPARATION.label);
+        order.setChefId(employeeId);
+        orderPersistencePort.updateOrder(order);
     }
 
     @Override
