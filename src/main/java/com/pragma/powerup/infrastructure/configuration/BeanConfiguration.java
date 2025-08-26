@@ -23,6 +23,8 @@ public class BeanConfiguration {
     private final ICategoryRepository categoryRepository;
     private final IOrderRepository orderRepository;
     private final IOrderEntityMapper orderEntityMapper;
+    private final IRestaurantEmployeeRepository restaurantEmployeeRepository;
+    private final IRestaurantEmployeeEntityMapper restaurantEmployeeEntityMapper;
 
     @Bean
     public ICategoryPersistencePort categoryPersistencePort() {
@@ -66,6 +68,16 @@ public class BeanConfiguration {
 
     @Bean
     public IOrderServicePort orderServicePort() {
-        return new OrderUseCase(orderPersistencePort());
+        return new OrderUseCase(orderPersistencePort(),restaurantEmployeePersistencePort());
+    }
+
+    @Bean
+    public IRestaurantEmployeePersistencePort restaurantEmployeePersistencePort() {
+        return new RestaurantEmployeeJpaAdapter(restaurantEmployeeRepository, restaurantEmployeeEntityMapper);
+    }
+
+    @Bean
+    public IRestaurantEmployeeServicePort restaurantEmployeeServicePort() {
+        return new RestaurantEmployeeUseCase(restaurantEmployeePersistencePort());
     }
 }

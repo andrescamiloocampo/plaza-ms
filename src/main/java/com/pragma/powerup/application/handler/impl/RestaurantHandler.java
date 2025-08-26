@@ -4,8 +4,8 @@ import com.pragma.powerup.application.dto.request.RestaurantRequestDto;
 import com.pragma.powerup.application.dto.response.RestaurantPartialResponseDto;
 import com.pragma.powerup.application.dto.response.RestaurantResponseDto;
 import com.pragma.powerup.application.handler.IRestaurantHandler;
-import com.pragma.powerup.application.mapper.IRestaurantRequestMapper;
-import com.pragma.powerup.application.mapper.IRestaurantResponseMapper;
+import com.pragma.powerup.application.mapper.request.IRestaurantRequestMapper;
+import com.pragma.powerup.application.mapper.response.IRestaurantResponseMapper;
 import com.pragma.powerup.domain.api.IRestaurantServicePort;
 import com.pragma.powerup.domain.model.RestaurantModel;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +43,12 @@ public class RestaurantHandler implements IRestaurantHandler {
     @Override
     public boolean getOwnership(int id, int ownerId){
         return restaurantServicePort.getOwnership(id,ownerId);
+    }
+
+    @Override
+    public List<RestaurantResponseDto> getRestaurantsByOwnerId(int ownerId) {
+        List<RestaurantModel> restaurants = restaurantServicePort.getRestaurantByOwnerId(ownerId);
+        return restaurantResponseMapper.toResponseList(restaurants);
     }
 
 }

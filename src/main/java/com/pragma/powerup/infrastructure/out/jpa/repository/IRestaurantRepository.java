@@ -4,10 +4,11 @@ import com.pragma.powerup.infrastructure.out.jpa.entity.RestaurantEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
 
-public interface IRestaurantRepository extends JpaRepository<RestaurantEntity,Integer> {
+public interface IRestaurantRepository extends JpaRepository<RestaurantEntity,Integer>, JpaSpecificationExecutor<RestaurantEntity> {
     boolean existsByIdAndOwnerId(int id, int ownerId);
-    Page<RestaurantEntity> findAll(Pageable pageable);
+    List<RestaurantEntity> findByOwnerId(int ownerId);
 }
