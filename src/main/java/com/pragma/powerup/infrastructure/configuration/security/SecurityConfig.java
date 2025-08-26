@@ -25,8 +25,8 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
                         .antMatchers("/api/v1/restaurants/**").authenticated()
-                        .antMatchers("/api/v1/dishes/**").hasAuthority("OWNER")
-                        .antMatchers("/api/v1/orders/**").authenticated()
+                        .antMatchers("/api/v1/dishes/**","/api/v1/employees/**").hasAuthority("OWNER")
+                        .antMatchers("/api/v1/orders/**").hasAnyAuthority("EMPLOYEE","OWNER","CUSTOMER","ADMIN")
                         .antMatchers("/swagger-ui/**","/v3/api-docs/**").permitAll()
 
                         .anyRequest().authenticated()

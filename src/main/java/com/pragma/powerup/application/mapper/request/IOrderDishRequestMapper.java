@@ -1,4 +1,4 @@
-package com.pragma.powerup.application.mapper;
+package com.pragma.powerup.application.mapper.request;
 
 import com.pragma.powerup.domain.model.OrderDishModel;
 import com.pragma.powerup.infrastructure.out.jpa.entity.OrderDishEntity;

@@ -1,4 +1,4 @@
-package com.pragma.powerup.infrastructure.out.feign;
+package com.pragma.powerup.infrastructure.out.feign.client;
 
 import com.pragma.powerup.infrastructure.out.feign.dto.response.UserResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
