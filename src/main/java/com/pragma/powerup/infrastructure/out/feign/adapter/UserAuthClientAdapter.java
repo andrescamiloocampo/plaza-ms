@@ -2,7 +2,7 @@ package com.pragma.powerup.infrastructure.out.feign.adapter;
 
 import com.pragma.powerup.infrastructure.out.feign.dto.response.UserResponseDto;
 import com.pragma.powerup.domain.spi.IUserAuthClientPort;
-import com.pragma.powerup.infrastructure.out.feign.UserAuthClient;
+import com.pragma.powerup.infrastructure.out.feign.client.UserAuthClient;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 

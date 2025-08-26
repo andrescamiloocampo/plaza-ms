@@ -10,4 +10,5 @@ public interface IRestaurantPersistencePort {
     RestaurantModel getRestaurantById(int id);
     List<RestaurantModel> getRestaurants(int page, int size);
     boolean getOwnership(int id, int ownerId);
+    List<RestaurantModel> getRestaurantsByOwnerId(int ownerId);
 }
