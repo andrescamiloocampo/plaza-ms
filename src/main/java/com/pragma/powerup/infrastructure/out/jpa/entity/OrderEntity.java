@@ -29,6 +29,9 @@ public class OrderEntity {
     @Column(name = "state", nullable = false)
     private String state;
 
+    @Column(name = "pin",length = 4)
+    private String pin;
+
     @Column(name = "chefId")
     private int chefId;
 

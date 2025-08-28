@@ -14,7 +14,8 @@ public enum ExceptionResponse {
     INVALID_PRICE("The price cannot be less than or equal to zero"),
     ILLEGAL_ARGUMENT("Illegal arguments provided"),
     ORDER_IN_PROCESS("The user already has orders in process"),
-    INVALID_USER("This action is not allowed for this user");
+    INVALID_USER("This action is not allowed for this user"),
+    INVALID_ORDER_ACTION("This action is not allowed for the current order status"),;
 
     private final String message;
 

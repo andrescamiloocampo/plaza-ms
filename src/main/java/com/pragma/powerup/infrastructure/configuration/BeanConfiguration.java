@@ -6,6 +6,7 @@ import com.pragma.powerup.domain.usecase.*;
 import com.pragma.powerup.infrastructure.out.jpa.adapter.*;
 import com.pragma.powerup.infrastructure.out.jpa.mapper.*;
 import com.pragma.powerup.infrastructure.out.jpa.repository.*;
+import com.pragma.powerup.infrastructure.out.sms.adapter.TwilioNotificationAdapter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -67,8 +68,13 @@ public class BeanConfiguration {
     }
 
     @Bean
+    public INotificationPort notificationPort() {
+        return new TwilioNotificationAdapter();
+    }
+
+    @Bean
     public IOrderServicePort orderServicePort() {
-        return new OrderUseCase(orderPersistencePort(),restaurantEmployeePersistencePort());
+        return new OrderUseCase(orderPersistencePort(),restaurantEmployeePersistencePort(),notificationPort(),userAuthClientPort);
     }
 
     @Bean
