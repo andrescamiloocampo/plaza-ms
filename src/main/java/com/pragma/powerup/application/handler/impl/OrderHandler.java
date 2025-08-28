@@ -28,7 +28,12 @@ public class OrderHandler implements IOrderHandler {
 
     @Override
     public void updateOrder(int orderId, int employeeId) {
-        orderServicePort.updateOrder(orderId,employeeId);
+        orderServicePort.assignOrder(orderId,employeeId);
+    }
+
+    @Override
+    public void notifyOrderReady(int orderId, int userId) {
+        orderServicePort.completeOrder(orderId,userId);
     }
 
     @Override

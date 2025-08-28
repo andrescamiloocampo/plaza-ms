@@ -16,5 +16,6 @@ public class OrderResponseDto {
     private String state;
     private int chefId;
     private int restaurantId;
+    private String pin;
     private List<OrderDishModel> orderDishes;
 }
