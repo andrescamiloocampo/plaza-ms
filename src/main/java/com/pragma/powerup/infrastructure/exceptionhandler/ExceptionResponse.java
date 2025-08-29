@@ -15,7 +15,8 @@ public enum ExceptionResponse {
     ILLEGAL_ARGUMENT("Illegal arguments provided"),
     ORDER_IN_PROCESS("The user already has orders in process"),
     INVALID_USER("This action is not allowed for this user"),
-    INVALID_ORDER_ACTION("This action is not allowed for the current order status"),;
+    INVALID_ORDER_ACTION("This action is not allowed for the current order status"),
+    WRONG_CREDENTIALS("Wrong credentials"),;
 
     private final String message;
 
