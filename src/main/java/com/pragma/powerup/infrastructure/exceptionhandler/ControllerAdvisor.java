@@ -127,4 +127,12 @@ public class ControllerAdvisor {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_ORDER_ACTION.getMessage()));
     }
+
+    @ExceptionHandler(WrongCredentialsException.class)
+    public ResponseEntity<Map<String, String>> handleWrongCredentialsException(
+            WrongCredentialsException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.WRONG_CREDENTIALS.getMessage()));
+    }
 }
