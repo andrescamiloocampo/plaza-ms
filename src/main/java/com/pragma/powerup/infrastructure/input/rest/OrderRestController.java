@@ -52,6 +52,20 @@ public class OrderRestController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Notify order ready")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order ready notified", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden authentication required", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Illegal request params provided", content = @Content)
+    })
+    @PutMapping("/{orderId}")
+    public ResponseEntity<Void> notifyOrderReady(@PathVariable int orderId,
+                                                  Authentication authentication) {
+        int employeeId = Integer.parseInt(authentication.getPrincipal().toString());
+        orderHandler.notifyOrderReady(orderId,employeeId);
+        return ResponseEntity.ok().build();
+    }
+
     @PreAuthorize("hasAnyAuthority('ADMIN','OWNER','EMPLOYEE')")
     @Operation(summary = "Get orders")
     @ApiResponses(value = {

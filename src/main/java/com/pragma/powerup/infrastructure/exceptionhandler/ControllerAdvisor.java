@@ -75,7 +75,7 @@ public class ControllerAdvisor {
     @ExceptionHandler(InvalidOwnerException.class)
     public ResponseEntity<Map<String, String>> handleInvalidOwnerException(
             InvalidOwnerException ex
-    ){
+    ) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_OWNER.getMessage()));
     }
@@ -83,7 +83,7 @@ public class ControllerAdvisor {
     @ExceptionHandler(InvalidCategoryException.class)
     public ResponseEntity<Map<String, String>> handleInvalidCategoryException(
             InvalidCategoryException ex
-    ){
+    ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_CATEGORY.getMessage()));
     }
@@ -91,32 +91,40 @@ public class ControllerAdvisor {
     @ExceptionHandler(InvalidPriceException.class)
     public ResponseEntity<Map<String, String>> handleInvalidPriceException(
             InvalidPriceException ex
-    ){
+    ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap(MESSAGE,ExceptionResponse.INVALID_PRICE.getMessage()));
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_PRICE.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgumentException(
             IllegalArgumentException ex
-    ){
+    ) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Collections.singletonMap(MESSAGE,ExceptionResponse.ILLEGAL_ARGUMENT.getMessage()));
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.ILLEGAL_ARGUMENT.getMessage()));
     }
 
     @ExceptionHandler(OrderInProcessException.class)
     public ResponseEntity<Map<String, String>> handleOrderInProcessException(
             OrderInProcessException ex
-    ){
+    ) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(Collections.singletonMap(MESSAGE,ExceptionResponse.ORDER_IN_PROCESS.getMessage()));
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.ORDER_IN_PROCESS.getMessage()));
     }
 
     @ExceptionHandler(InvalidUserException.class)
     public ResponseEntity<Map<String, String>> handleInvalidUserException(
             InvalidUserException ex
-    ){
+    ) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(Collections.singletonMap(MESSAGE,ExceptionResponse.INVALID_USER.getMessage()));
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_USER.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidOrderActionException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidOrderActionException(
+            InvalidOrderActionException ex
+    ) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Collections.singletonMap(MESSAGE, ExceptionResponse.INVALID_ORDER_ACTION.getMessage()));
     }
 }
