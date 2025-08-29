@@ -1,18 +1,24 @@
 package com.pragma.powerup.domain.usecase;
 
+import com.pragma.powerup.domain.exception.InvalidOrderActionException;
 import com.pragma.powerup.domain.exception.InvalidUserException;
 import com.pragma.powerup.domain.exception.OrderInProcessException;
 import com.pragma.powerup.domain.exception.UserNotFoundException;
 import com.pragma.powerup.domain.model.OrderModel;
 import com.pragma.powerup.domain.model.OrderState;
 import com.pragma.powerup.domain.model.RestaurantEmployeeModel;
+import com.pragma.powerup.domain.spi.INotificationPort;
 import com.pragma.powerup.domain.spi.IOrderPersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantEmployeePersistencePort;
+import com.pragma.powerup.domain.spi.IUserAuthClientPort;
+import com.pragma.powerup.infrastructure.out.feign.dto.response.RoleResponseDto;
+import com.pragma.powerup.infrastructure.out.feign.dto.response.UserResponseDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,6 +33,12 @@ class OrderUseCaseTest {
     @Mock
     private IRestaurantEmployeePersistencePort restaurantEmployeePersistencePort;
 
+    @Mock
+    private INotificationPort notificationPort;
+
+    @Mock
+    private IUserAuthClientPort userAuthClientPort;
+
     @InjectMocks
     private OrderUseCase orderUseCase;
 
@@ -40,8 +52,42 @@ class OrderUseCaseTest {
         employee.setRestaurantId(1);
         order = new OrderModel();
         order.setId(100);
+        order.setUserId(10);
         order.setRestaurantId(1);
         order.setState(OrderState.PENDING.label);
+    }
+
+    public static UserResponseDto createUser(
+            int id,
+            String name,
+            String lastname,
+            String phone,
+            LocalDate birthdate,
+            List<RoleResponseDto> roles
+    ) {
+        UserResponseDto user = new UserResponseDto();
+        user.setId(id);
+        user.setName(name);
+        user.setLastname(lastname);
+        user.setPhone(phone);
+        user.setBirthdate(birthdate);
+        user.setRoles(roles);
+        return user;
+    }
+
+    public static UserResponseDto createDefaultUser() {
+        RoleResponseDto role = new RoleResponseDto();
+        role.setName("CUSTOMER");
+        role.setDescription("Grant customer role");
+
+        return createUser(
+                10,
+                "Andres",
+                "Ocampo",
+                "  3216549870  ",
+                LocalDate.of(1995, 3, 15),
+                List.of(role)
+        );
     }
 
     @Test
@@ -144,7 +190,7 @@ class OrderUseCaseTest {
         when(restaurantEmployeePersistencePort.findByUserId(10)).thenReturn(employee);
         when(orderPersistencePort.getOrderById(100)).thenReturn(order);
 
-        orderUseCase.updateOrder(100, 10);
+        orderUseCase.assignOrder(100, 10);
 
         assertEquals("PREPARATION", order.getState());
         assertEquals(10, order.getChefId());
@@ -155,7 +201,7 @@ class OrderUseCaseTest {
     void testUpdateOrder_EmployeeNotFound() {
         when(restaurantEmployeePersistencePort.findByUserId(10)).thenReturn(null);
 
-        assertThrows(UserNotFoundException.class, () -> orderUseCase.updateOrder(100, 10));
+        assertThrows(UserNotFoundException.class, () -> orderUseCase.assignOrder(100, 10));
 
         verify(orderPersistencePort, never()).updateOrder(any());
     }
@@ -166,7 +212,7 @@ class OrderUseCaseTest {
         when(restaurantEmployeePersistencePort.findByUserId(10)).thenReturn(employee);
         when(orderPersistencePort.getOrderById(100)).thenReturn(order);
 
-        assertThrows(OrderInProcessException.class, () -> orderUseCase.updateOrder(100, 10));
+        assertThrows(OrderInProcessException.class, () -> orderUseCase.assignOrder(100, 10));
 
         verify(orderPersistencePort, never()).updateOrder(any());
     }
@@ -177,9 +223,53 @@ class OrderUseCaseTest {
         when(restaurantEmployeePersistencePort.findByUserId(10)).thenReturn(employee);
         when(orderPersistencePort.getOrderById(100)).thenReturn(order);
 
-        assertThrows(InvalidUserException.class, () -> orderUseCase.updateOrder(100, 10));
+        assertThrows(InvalidUserException.class, () -> orderUseCase.assignOrder(100, 10));
 
         verify(orderPersistencePort, never()).updateOrder(any());
     }
 
+    @Test
+    void completeOrder_shouldSendNotification_AndUpdateOrder() {
+        order.setId(1);
+        order.setUserId(10);
+        order.setChefId(5);
+        order.setState(OrderState.PENDING.label);
+
+        when(orderPersistencePort.getOrderById(1)).thenReturn(order);
+        when(userAuthClientPort.getUserById("10")).thenReturn(createDefaultUser());
+
+        orderUseCase.completeOrder(1, 5);
+
+        assertEquals(OrderState.DONE.label, order.getState());
+        assertNotNull(order.getPin());
+        assertFalse(order.getPin().isBlank());
+        verify(orderPersistencePort).updateOrder(order);
+        verify(notificationPort).sendNotification(
+                "3216549870",
+                "Your order is ready the security pin is:" + order.getPin()
+        );
+    }
+
+    @Test
+    void completeOrder_invalidChef_throwsException() {
+        order.setChefId(99);
+        order.setId(1);
+        order.setUserId(10);
+        when(orderPersistencePort.getOrderById(1)).thenReturn(order);
+        when(userAuthClientPort.getUserById(""+order.getUserId())).thenReturn(createDefaultUser());
+
+        assertThrows(InvalidUserException.class, () -> orderUseCase.completeOrder(1, 5));
+    }
+
+    @Test
+    void completeOrder_alreadyDone_throwsException() {
+        order.setChefId(5);
+        order.setState(OrderState.DONE.label);
+        order.setId(1);
+        order.setUserId(10);
+        when(orderPersistencePort.getOrderById(1)).thenReturn(order);
+        when(userAuthClientPort.getUserById(""+order.getUserId())).thenReturn(createDefaultUser());
+
+        assertThrows(InvalidOrderActionException.class, () -> orderUseCase.completeOrder(1, 5));
+    }
 }
