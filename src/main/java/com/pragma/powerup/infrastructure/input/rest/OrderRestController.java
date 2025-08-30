@@ -52,6 +52,22 @@ public class OrderRestController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasAuthority('EMPLOYEE')")
+    @Operation(summary = "Deliver order")
+    @ApiResponses(value = {
+                    @ApiResponse(responseCode = "200", description = "Order delivered", content = @Content),
+                    @ApiResponse(responseCode = "403", description = "Forbidden authentication required", content = @Content),
+                    @ApiResponse(responseCode = "400", description = "Illegal request params provided", content = @Content)
+            })
+    @PatchMapping("/deliver/{orderId}/{securityPin}")
+    public ResponseEntity<Void> deliverOrder(@PathVariable int orderId,
+                                             @PathVariable String securityPin,
+                                             Authentication authentication) {
+        int employeeId = Integer.parseInt(authentication.getPrincipal().toString());
+        orderHandler.deliverOrder(employeeId,orderId,securityPin);
+        return ResponseEntity.ok().build();
+    }
+
     @Operation(summary = "Notify order ready")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Order ready notified", content = @Content),

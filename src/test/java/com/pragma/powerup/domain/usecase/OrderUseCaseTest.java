@@ -1,9 +1,6 @@
 package com.pragma.powerup.domain.usecase;
 
-import com.pragma.powerup.domain.exception.InvalidOrderActionException;
-import com.pragma.powerup.domain.exception.InvalidUserException;
-import com.pragma.powerup.domain.exception.OrderInProcessException;
-import com.pragma.powerup.domain.exception.UserNotFoundException;
+import com.pragma.powerup.domain.exception.*;
 import com.pragma.powerup.domain.model.OrderModel;
 import com.pragma.powerup.domain.model.OrderState;
 import com.pragma.powerup.domain.model.RestaurantEmployeeModel;
@@ -89,6 +86,7 @@ class OrderUseCaseTest {
                 List.of(role)
         );
     }
+
 
     @Test
     void makeOrder_shouldThrowException_whenLastOrderNotDelivered() {
@@ -271,5 +269,64 @@ class OrderUseCaseTest {
         when(userAuthClientPort.getUserById(""+order.getUserId())).thenReturn(createDefaultUser());
 
         assertThrows(InvalidOrderActionException.class, () -> orderUseCase.completeOrder(1, 5));
+    }
+
+    @Test
+    void shouldThrowInvalidUserExceptionWhenChefIsDifferent() {
+        order.setChefId(99);
+        order.setState(OrderState.DONE.label);
+        order.setPin("1234");
+
+        when(orderPersistencePort.getOrderById(1)).thenReturn(order);
+
+        assertThrows(InvalidUserException.class,
+                () -> orderUseCase.deliverOrder(1, 1, "1234"));
+    }
+
+    @Test
+    void shouldThrowInvalidOrderActionExceptionWhenStateIsNotDone() {
+        order.setChefId(1);
+        order.setState(OrderState.PENDING.label);
+        order.setPin("1234");
+
+        when(orderPersistencePort.getOrderById(1)).thenReturn(order);
+
+        assertThrows(InvalidOrderActionException.class,
+                () -> orderUseCase.deliverOrder(1, 1, "1234"));
+    }
+
+    @Test
+    void shouldThrowInvalidOrderActionExceptionWhenStateIsDelivered() {
+        order.setChefId(1);
+        order.setState(OrderState.DELIVERED.label);
+        order.setPin("1234");
+        when(orderPersistencePort.getOrderById(1)).thenReturn(order);
+
+        assertThrows(InvalidOrderActionException.class,
+                () -> orderUseCase.deliverOrder(1, 1, "1234"));
+    }
+
+    @Test
+    void shouldThrowWrongCredentialsExceptionWhenPinIsWrong() {
+        order.setChefId(1);
+        order.setState(OrderState.DONE.label);
+        order.setPin("1234");
+        when(orderPersistencePort.getOrderById(1)).thenReturn(order);
+
+        assertThrows(WrongCredentialsException.class,
+                () -> orderUseCase.deliverOrder(1, 1, "9999"));
+    }
+
+    @Test
+    void shouldDeliverOrderSuccessfully() {
+        order.setChefId(1);
+        order.setState(OrderState.DONE.label);
+        order.setPin("1234");
+
+        when(orderPersistencePort.getOrderById(1)).thenReturn(order);
+        orderUseCase.deliverOrder(1, 1, "1234");
+
+        assertEquals(OrderState.DELIVERED.label, order.getState());
+        verify(orderPersistencePort).updateOrder(order);
     }
 }

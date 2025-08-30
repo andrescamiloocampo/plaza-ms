@@ -4,7 +4,8 @@ public enum OrderState {
     PENDING("PENDING"),
     PREPARATION("PREPARATION"),
     DONE("DONE"),
-    DELIVERED("DELIVERED");
+    DELIVERED("DELIVERED"),
+    CANCELED("CANCELED");
 
     public final String label;
 
