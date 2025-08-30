@@ -42,6 +42,11 @@ public class OrderHandler implements IOrderHandler {
     }
 
     @Override
+    public void cancelOrder(int customerId) {
+        orderServicePort.cancelOrder(customerId);
+    }
+
+    @Override
     public List<OrderResponseDto> getOrders(int page, int size, String state, int userId) {
         return orderResponseMapper
                 .toResponseList(orderServicePort.getOrders(page, size, state.toUpperCase(), userId));
