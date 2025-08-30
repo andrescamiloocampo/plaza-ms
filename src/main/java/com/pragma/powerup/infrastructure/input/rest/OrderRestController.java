@@ -82,6 +82,20 @@ public class OrderRestController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @Operation(summary = "Cancel order")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order canceled", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden authentication required", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Order not found", content = @Content)
+    })
+    @PutMapping("/cancel")
+    public ResponseEntity<Void> cancelOrder(Authentication authentication) {
+        int customerId = Integer.parseInt(authentication.getPrincipal().toString());
+        orderHandler.cancelOrder(customerId);
+        return ResponseEntity.ok().build();
+    }
+
     @PreAuthorize("hasAnyAuthority('ADMIN','OWNER','EMPLOYEE')")
     @Operation(summary = "Get orders")
     @ApiResponses(value = {

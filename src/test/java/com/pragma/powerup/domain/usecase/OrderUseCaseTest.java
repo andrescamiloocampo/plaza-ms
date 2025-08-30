@@ -12,6 +12,7 @@ import com.pragma.powerup.infrastructure.out.feign.dto.response.RoleResponseDto;
 import com.pragma.powerup.infrastructure.out.feign.dto.response.UserResponseDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -328,5 +329,37 @@ class OrderUseCaseTest {
 
         assertEquals(OrderState.DELIVERED.label, order.getState());
         verify(orderPersistencePort).updateOrder(order);
+    }
+
+    @Test
+    void cancelOrder_shouldThrowOrderNotFound_whenNoOrderExists() {
+        when(orderPersistencePort.getOrderByUserId(1)).thenReturn(null);
+        assertThrows(OrderNotFoundException.class, () -> orderUseCase.cancelOrder(1));
+        verify(orderPersistencePort, never()).updateOrder(any());
+    }
+
+    @Test
+    void cancelOrder_shouldThrowInvalidOrderAction_whenOrderIsNotPending() {
+        OrderModel order = new OrderModel();
+        order.setState(OrderState.DONE.label);
+
+        when(orderPersistencePort.getOrderByUserId(1)).thenReturn(order);
+
+        assertThrows(InvalidOrderActionException.class, () -> orderUseCase.cancelOrder(1));
+        verify(orderPersistencePort, never()).updateOrder(any());
+    }
+
+    @Test
+    void cancelOrder_shouldUpdateOrderToCanceled_whenOrderIsPending() {
+        OrderModel order = new OrderModel();
+        order.setState(OrderState.PENDING.label);
+
+        when(orderPersistencePort.getOrderByUserId(1)).thenReturn(order);
+
+        orderUseCase.cancelOrder(1);
+
+        ArgumentCaptor<OrderModel> captor = ArgumentCaptor.forClass(OrderModel.class);
+        verify(orderPersistencePort).updateOrder(captor.capture());
+        assertEquals(OrderState.CANCELED.label, captor.getValue().getState());
     }
 }
