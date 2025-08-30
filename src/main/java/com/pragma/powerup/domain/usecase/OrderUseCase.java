@@ -9,6 +9,7 @@ import com.pragma.powerup.domain.spi.INotificationPort;
 import com.pragma.powerup.domain.spi.IOrderPersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantEmployeePersistencePort;
 import com.pragma.powerup.domain.spi.IUserAuthClientPort;
+import com.pragma.powerup.infrastructure.exception.NoDataFoundException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -114,6 +115,22 @@ public class OrderUseCase implements IOrderServicePort {
 
         order.setState(OrderState.DELIVERED.label);
         orderPersistencePort.updateOrder(order);
+    }
+
+    @Override
+    public void cancelOrder(int customerId) {
+        OrderModel currentOrder = orderPersistencePort.getOrderByUserId(customerId);
+
+        if(currentOrder == null){
+            throw new OrderNotFoundException();
+        }
+
+        if(!OrderState.PENDING.label.equals(currentOrder.getState())){
+            throw new InvalidOrderActionException();
+        }
+
+        currentOrder.setState(OrderState.CANCELED.label);
+        orderPersistencePort.updateOrder(currentOrder);
     }
 
     @Override

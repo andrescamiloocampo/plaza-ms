@@ -9,5 +9,6 @@ public interface IOrderServicePort {
     void assignOrder(int orderId, int employeeId);
     void completeOrder(int orderId, int employeeId);
     void deliverOrder(int userId,int orderId, String securityPin);
+    void cancelOrder(int customerId);
     List<OrderModel> getOrders(int page, int size, String state,int employeeId);
 }

@@ -16,7 +16,9 @@ public enum ExceptionResponse {
     ORDER_IN_PROCESS("The user already has orders in process"),
     INVALID_USER("This action is not allowed for this user"),
     INVALID_ORDER_ACTION("This action is not allowed for the current order status"),
-    WRONG_CREDENTIALS("Wrong credentials"),;
+    WRONG_CREDENTIALS("Wrong credentials"),
+    ORDER_NOT_FOUND("Order not found for the current user"),
+    ;
 
     private final String message;
 
