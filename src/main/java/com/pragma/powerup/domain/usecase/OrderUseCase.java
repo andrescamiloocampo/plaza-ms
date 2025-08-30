@@ -1,10 +1,7 @@
 package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.api.IOrderServicePort;
-import com.pragma.powerup.domain.exception.InvalidOrderActionException;
-import com.pragma.powerup.domain.exception.InvalidUserException;
-import com.pragma.powerup.domain.exception.OrderInProcessException;
-import com.pragma.powerup.domain.exception.UserNotFoundException;
+import com.pragma.powerup.domain.exception.*;
 import com.pragma.powerup.domain.model.OrderModel;
 import com.pragma.powerup.domain.model.OrderState;
 import com.pragma.powerup.domain.model.RestaurantEmployeeModel;
@@ -92,8 +89,31 @@ public class OrderUseCase implements IOrderServicePort {
 
         notificationPort.sendNotification(
                 userPhone.trim(),
-                "Your order is ready the security pin is:" + securityPin
+                "Your order is ready the security pin is: " + securityPin
         );
+    }
+
+    @Override
+    public void deliverOrder(int userId, int orderId, String securityPin) {
+        OrderModel order = orderPersistencePort.getOrderById(orderId);
+        if(order.getChefId() != userId){
+            throw new InvalidUserException();
+        }
+
+        if(!OrderState.DONE.label.equals(order.getState())){
+            throw new InvalidOrderActionException();
+        }
+
+        if (OrderState.DELIVERED.label.equals(order.getState())) {
+            throw new InvalidOrderActionException();
+        }
+
+        if(!order.getPin().equals(securityPin)){
+            throw new WrongCredentialsException();
+        }
+
+        order.setState(OrderState.DELIVERED.label);
+        orderPersistencePort.updateOrder(order);
     }
 
     @Override
