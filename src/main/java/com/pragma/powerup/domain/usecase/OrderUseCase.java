@@ -2,14 +2,8 @@ package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.api.IOrderServicePort;
 import com.pragma.powerup.domain.exception.*;
-import com.pragma.powerup.domain.model.OrderModel;
-import com.pragma.powerup.domain.model.OrderState;
-import com.pragma.powerup.domain.model.RestaurantEmployeeModel;
-import com.pragma.powerup.domain.spi.INotificationPort;
-import com.pragma.powerup.domain.spi.IOrderPersistencePort;
-import com.pragma.powerup.domain.spi.IRestaurantEmployeePersistencePort;
-import com.pragma.powerup.domain.spi.IUserAuthClientPort;
-import com.pragma.powerup.infrastructure.exception.NoDataFoundException;
+import com.pragma.powerup.domain.model.*;
+import com.pragma.powerup.domain.spi.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,52 +16,63 @@ public class OrderUseCase implements IOrderServicePort {
     private final IRestaurantEmployeePersistencePort restaurantEmployeePersistencePort;
     private final INotificationPort notificationPort;
     private final IUserAuthClientPort authClientPort;
+    private final IOrderLogsClientPort orderLogsClientPort;
     private static final Random random = new Random();
+
+    private final Set<String> allowedOrderStates = Set.of(
+            OrderState.DELIVERED.label,
+            OrderState.CANCELED.label
+    );
 
     public OrderUseCase(IOrderPersistencePort orderPersistencePort,
                         IRestaurantEmployeePersistencePort restaurantEmployeePersistencePort,
                         INotificationPort notificationPort,
-                        IUserAuthClientPort authClientPort) {
+                        IUserAuthClientPort authClientPort,
+                        IOrderLogsClientPort orderLogsClientPort) {
         this.orderPersistencePort = orderPersistencePort;
         this.restaurantEmployeePersistencePort = restaurantEmployeePersistencePort;
         this.notificationPort = notificationPort;
         this.authClientPort = authClientPort;
+        this.orderLogsClientPort = orderLogsClientPort;
     }
 
     @Override
     public void makeOrder(OrderModel order) {
         OrderModel lastUserOrder = orderPersistencePort.getOrderByUserId(order.getUserId());
 
-        if (lastUserOrder != null && !lastUserOrder.getState().equals(OrderState.DELIVERED.label)) {
+        if (lastUserOrder != null && !this.allowedOrderStates.contains(lastUserOrder.getState())) {
             throw new OrderInProcessException();
         }
 
         order.setDate(LocalDateTime.now());
         order.setState(OrderState.PENDING.label);
-        orderPersistencePort.makeOrder(order);
+        OrderModel savedOrder = orderPersistencePort.makeOrder(order);
+        OrderLogStatus orderLogStatus = new OrderLogStatus(null, OrderState.PENDING.label, LocalDateTime.now());
+        OrderLogModel orderLogModel = new OrderLogModel((long) savedOrder.getId(), null, (long) order.getUserId(), List.of(orderLogStatus));
+        orderLogsClientPort.logOrderStatusChange(orderLogModel);
     }
 
     @Override
     public void assignOrder(int orderId, int employeeId) {
         RestaurantEmployeeModel employee = restaurantEmployeePersistencePort.findByUserId(employeeId);
-
-        if (employee == null) {
-            throw new UserNotFoundException();
-        }
+        validateEmployee(employee);
 
         OrderModel order = orderPersistencePort.getOrderById(orderId);
+        validateOrderState(order);
+        validateSameRestaurant(order, employee);
 
-        if (!order.getState().equals(OrderState.PENDING.label)) {
-            throw new OrderInProcessException();
-        }
-
-        if (order.getRestaurantId() != employee.getRestaurantId()) {
-            throw new InvalidUserException();
-        }
+        OrderLogStatus orderLogStatus = new OrderLogStatus();
+        orderLogStatus.setPreviousState(order.getState());
 
         order.setState(OrderState.PREPARATION.label);
         order.setChefId(employeeId);
+
+        orderLogStatus.setNewState(order.getState());
+        orderLogStatus.setChangedAt(LocalDateTime.now());
+
         orderPersistencePort.updateOrder(order);
+        OrderLogModel orderLogModel = new OrderLogModel((long) order.getId(), (long) employeeId, (long) order.getUserId(), List.of(orderLogStatus));
+        orderLogsClientPort.logOrderStatusChange(orderLogModel);
     }
 
     @Override
@@ -97,11 +102,11 @@ public class OrderUseCase implements IOrderServicePort {
     @Override
     public void deliverOrder(int userId, int orderId, String securityPin) {
         OrderModel order = orderPersistencePort.getOrderById(orderId);
-        if(order.getChefId() != userId){
+        if (order.getChefId() != userId) {
             throw new InvalidUserException();
         }
 
-        if(!OrderState.DONE.label.equals(order.getState())){
+        if (!OrderState.DONE.label.equals(order.getState())) {
             throw new InvalidOrderActionException();
         }
 
@@ -109,7 +114,7 @@ public class OrderUseCase implements IOrderServicePort {
             throw new InvalidOrderActionException();
         }
 
-        if(!order.getPin().equals(securityPin)){
+        if (!order.getPin().equals(securityPin)) {
             throw new WrongCredentialsException();
         }
 
@@ -121,11 +126,11 @@ public class OrderUseCase implements IOrderServicePort {
     public void cancelOrder(int customerId) {
         OrderModel currentOrder = orderPersistencePort.getOrderByUserId(customerId);
 
-        if(currentOrder == null){
+        if (currentOrder == null) {
             throw new OrderNotFoundException();
         }
 
-        if(!OrderState.PENDING.label.equals(currentOrder.getState())){
+        if (!OrderState.PENDING.label.equals(currentOrder.getState())) {
             throw new InvalidOrderActionException();
         }
 
@@ -148,4 +153,23 @@ public class OrderUseCase implements IOrderServicePort {
 
         return orderPersistencePort.getOrders(employee.getRestaurantId(), page, size, state);
     }
+
+    private void validateEmployee(RestaurantEmployeeModel employee) {
+        if (employee == null) {
+            throw new UserNotFoundException();
+        }
+    }
+
+    private void validateOrderState(OrderModel order) {
+        if (!OrderState.PENDING.label.equals(order.getState())) {
+            throw new OrderInProcessException();
+        }
+    }
+
+    private void validateSameRestaurant(OrderModel order, RestaurantEmployeeModel employee) {
+        if (order.getRestaurantId() != employee.getRestaurantId()) {
+            throw new InvalidUserException();
+        }
+    }
+
 }

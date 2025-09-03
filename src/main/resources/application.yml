@@ -20,6 +20,11 @@ user:
     service:
       url: http://localhost:8081/api/v1
 
+order:
+  logs:
+    service:
+      url: http://localhost:8083/api/v1
+
 twilio:
   account-sid:
   auth-token:
