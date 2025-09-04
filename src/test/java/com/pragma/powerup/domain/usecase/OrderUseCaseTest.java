@@ -1,10 +1,9 @@
 package com.pragma.powerup.domain.usecase;
 
 import com.pragma.powerup.domain.exception.*;
-import com.pragma.powerup.domain.model.OrderModel;
-import com.pragma.powerup.domain.model.OrderState;
-import com.pragma.powerup.domain.model.RestaurantEmployeeModel;
+import com.pragma.powerup.domain.model.*;
 import com.pragma.powerup.domain.spi.INotificationPort;
+import com.pragma.powerup.domain.spi.IOrderLogsClientPort;
 import com.pragma.powerup.domain.spi.IOrderPersistencePort;
 import com.pragma.powerup.domain.spi.IRestaurantEmployeePersistencePort;
 import com.pragma.powerup.domain.spi.IUserAuthClientPort;
@@ -36,6 +35,9 @@ class OrderUseCaseTest {
 
     @Mock
     private IUserAuthClientPort userAuthClientPort;
+
+    @Mock
+    private IOrderLogsClientPort orderLogsClientPort;
 
     @InjectMocks
     private OrderUseCase orderUseCase;
@@ -106,12 +108,14 @@ class OrderUseCaseTest {
         order.setUserId(1);
 
         when(orderPersistencePort.getOrderByUserId(1)).thenReturn(null);
+        when(orderPersistencePort.makeOrder(any(OrderModel.class))).thenReturn(order);
 
         orderUseCase.makeOrder(order);
 
         assertNotNull(order.getDate());
         assertEquals(OrderState.PENDING.label, order.getState());
         verify(orderPersistencePort).makeOrder(order);
+        verify(orderLogsClientPort).logOrderStatusChange(any(OrderLogModel.class));
     }
 
     @Test
@@ -122,10 +126,13 @@ class OrderUseCaseTest {
         lastOrder.setState(OrderState.DELIVERED.label);
 
         when(orderPersistencePort.getOrderByUserId(1)).thenReturn(lastOrder);
+        when(orderPersistencePort.makeOrder(any(OrderModel.class))).thenReturn(order);
+
         orderUseCase.makeOrder(order);
 
         assertEquals(OrderState.PENDING.label, order.getState());
         verify(orderPersistencePort).makeOrder(order);
+        verify(orderLogsClientPort).logOrderStatusChange(any(OrderLogModel.class));
     }
 
     @Test
@@ -194,6 +201,7 @@ class OrderUseCaseTest {
         assertEquals("PREPARATION", order.getState());
         assertEquals(10, order.getChefId());
         verify(orderPersistencePort).updateOrder(order);
+        verify(orderLogsClientPort).logOrderStatusChange(any(OrderLogModel.class));
     }
 
     @Test
@@ -203,6 +211,7 @@ class OrderUseCaseTest {
         assertThrows(UserNotFoundException.class, () -> orderUseCase.assignOrder(100, 10));
 
         verify(orderPersistencePort, never()).updateOrder(any());
+        verify(orderLogsClientPort, never()).logOrderStatusChange(any(OrderLogModel.class));
     }
 
     @Test
@@ -214,6 +223,7 @@ class OrderUseCaseTest {
         assertThrows(OrderInProcessException.class, () -> orderUseCase.assignOrder(100, 10));
 
         verify(orderPersistencePort, never()).updateOrder(any());
+        verify(orderLogsClientPort, never()).logOrderStatusChange(any(OrderLogModel.class));
     }
 
     @Test
@@ -225,6 +235,7 @@ class OrderUseCaseTest {
         assertThrows(InvalidUserException.class, () -> orderUseCase.assignOrder(100, 10));
 
         verify(orderPersistencePort, never()).updateOrder(any());
+        verify(orderLogsClientPort, never()).logOrderStatusChange(any(OrderLogModel.class));
     }
 
     @Test
@@ -245,8 +256,9 @@ class OrderUseCaseTest {
         verify(orderPersistencePort).updateOrder(order);
         verify(notificationPort).sendNotification(
                 "3216549870",
-                "Your order is ready the security pin is:" + order.getPin()
+                "Your order is ready the security pin is: " + order.getPin()
         );
+        verify(orderLogsClientPort).logOrderStatusChange(any(OrderLogModel.class));
     }
 
     @Test
@@ -258,6 +270,7 @@ class OrderUseCaseTest {
         when(userAuthClientPort.getUserById(""+order.getUserId())).thenReturn(createDefaultUser());
 
         assertThrows(InvalidUserException.class, () -> orderUseCase.completeOrder(1, 5));
+        verify(orderLogsClientPort, never()).logOrderStatusChange(any(OrderLogModel.class));
     }
 
     @Test
@@ -270,6 +283,7 @@ class OrderUseCaseTest {
         when(userAuthClientPort.getUserById(""+order.getUserId())).thenReturn(createDefaultUser());
 
         assertThrows(InvalidOrderActionException.class, () -> orderUseCase.completeOrder(1, 5));
+        verify(orderLogsClientPort, never()).logOrderStatusChange(any(OrderLogModel.class));
     }
 
     @Test
@@ -282,6 +296,7 @@ class OrderUseCaseTest {
 
         assertThrows(InvalidUserException.class,
                 () -> orderUseCase.deliverOrder(1, 1, "1234"));
+        verify(orderLogsClientPort, never()).logOrderStatusChange(any(OrderLogModel.class));
     }
 
     @Test
@@ -294,6 +309,7 @@ class OrderUseCaseTest {
 
         assertThrows(InvalidOrderActionException.class,
                 () -> orderUseCase.deliverOrder(1, 1, "1234"));
+        verify(orderLogsClientPort, never()).logOrderStatusChange(any(OrderLogModel.class));
     }
 
     @Test
@@ -305,6 +321,7 @@ class OrderUseCaseTest {
 
         assertThrows(InvalidOrderActionException.class,
                 () -> orderUseCase.deliverOrder(1, 1, "1234"));
+        verify(orderLogsClientPort, never()).logOrderStatusChange(any(OrderLogModel.class));
     }
 
     @Test
@@ -316,6 +333,7 @@ class OrderUseCaseTest {
 
         assertThrows(WrongCredentialsException.class,
                 () -> orderUseCase.deliverOrder(1, 1, "9999"));
+        verify(orderLogsClientPort, never()).logOrderStatusChange(any(OrderLogModel.class));
     }
 
     @Test
@@ -329,6 +347,7 @@ class OrderUseCaseTest {
 
         assertEquals(OrderState.DELIVERED.label, order.getState());
         verify(orderPersistencePort).updateOrder(order);
+        verify(orderLogsClientPort).logOrderStatusChange(any(OrderLogModel.class));
     }
 
     @Test
