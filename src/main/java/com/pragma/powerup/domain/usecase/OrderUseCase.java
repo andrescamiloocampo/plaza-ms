@@ -19,7 +19,7 @@ public class OrderUseCase implements IOrderServicePort {
     private final IOrderLogsClientPort orderLogsClientPort;
     private static final Random random = new Random();
 
-    private final Set<String> allowedOrderStates = Set.of(
+    private final Set<String> allowedOrderStatesForNewOrder = Set.of(
             OrderState.DELIVERED.label,
             OrderState.CANCELED.label
     );
@@ -40,16 +40,11 @@ public class OrderUseCase implements IOrderServicePort {
     public void makeOrder(OrderModel order) {
         OrderModel lastUserOrder = orderPersistencePort.getOrderByUserId(order.getUserId());
 
-        if (lastUserOrder != null && !this.allowedOrderStates.contains(lastUserOrder.getState())) {
+        if (lastUserOrder != null && !allowedOrderStatesForNewOrder.contains(lastUserOrder.getState())) {
             throw new OrderInProcessException();
         }
 
-        order.setDate(LocalDateTime.now());
-        order.setState(OrderState.PENDING.label);
-        OrderModel savedOrder = orderPersistencePort.makeOrder(order);
-        OrderLogStatus orderLogStatus = new OrderLogStatus(null, OrderState.PENDING.label, LocalDateTime.now());
-        OrderLogModel orderLogModel = new OrderLogModel((long) savedOrder.getId(), null, (long) order.getUserId(), List.of(orderLogStatus));
-        orderLogsClientPort.logOrderStatusChange(orderLogModel);
+        createAndSaveOrder(order);
     }
 
     @Override
@@ -58,68 +53,46 @@ public class OrderUseCase implements IOrderServicePort {
         validateEmployee(employee);
 
         OrderModel order = orderPersistencePort.getOrderById(orderId);
-        validateOrderState(order);
-        validateSameRestaurant(order, employee);
+        validateOrderStateAndRestaurant(order, employee.getRestaurantId());
 
-        OrderLogStatus orderLogStatus = new OrderLogStatus();
-        orderLogStatus.setPreviousState(order.getState());
+        OrderLogStatus orderLogStatus = new OrderLogStatus(order.getState(), OrderState.PREPARATION.label, LocalDateTime.now());
 
         order.setState(OrderState.PREPARATION.label);
         order.setChefId(employeeId);
 
-        orderLogStatus.setNewState(order.getState());
-        orderLogStatus.setChangedAt(LocalDateTime.now());
-
         orderPersistencePort.updateOrder(order);
-        OrderLogModel orderLogModel = new OrderLogModel((long) order.getId(), (long) employeeId, (long) order.getUserId(), List.of(orderLogStatus));
-        orderLogsClientPort.logOrderStatusChange(orderLogModel);
+        logOrderStatusChange(order.getId(), employeeId, order.getUserId(), orderLogStatus);
     }
 
     @Override
     public void completeOrder(int orderId, int employeeId) {
         OrderModel order = orderPersistencePort.getOrderById(orderId);
-        String userPhone = authClientPort.getUserById(String.valueOf(order.getUserId())).getPhone();
 
-        if (order.getChefId() != employeeId) {
-            throw new InvalidUserException();
-        }
+        validateOrderCompletion(order, employeeId);
 
-        if (Set.of(OrderState.DONE.label, OrderState.DELIVERED.label).contains(order.getState())) {
-            throw new InvalidOrderActionException();
-        }
+        OrderLogStatus orderLogStatus = new OrderLogStatus(order.getState(), OrderState.DONE.label, LocalDateTime.now());
 
-        String securityPin = String.format("%04d", random.nextInt(10000));
-        order.setState(OrderState.DONE.label);
-        order.setPin(securityPin);
+        String securityPin = generateAndSetPin(order);
         orderPersistencePort.updateOrder(order);
 
-        notificationPort.sendNotification(
-                userPhone.trim(),
-                "Your order is ready the security pin is: " + securityPin
-        );
+        sendNotificationToUser(order.getUserId(), securityPin);
+
+        logOrderStatusChange(order.getId(), employeeId, order.getUserId(), orderLogStatus);
     }
 
     @Override
     public void deliverOrder(int userId, int orderId, String securityPin) {
         OrderModel order = orderPersistencePort.getOrderById(orderId);
-        if (order.getChefId() != userId) {
-            throw new InvalidUserException();
-        }
 
-        if (!OrderState.DONE.label.equals(order.getState())) {
-            throw new InvalidOrderActionException();
-        }
-
-        if (OrderState.DELIVERED.label.equals(order.getState())) {
-            throw new InvalidOrderActionException();
-        }
-
-        if (!order.getPin().equals(securityPin)) {
-            throw new WrongCredentialsException();
-        }
+        validateOrderDelivery(order, userId, securityPin);
+        OrderLogStatus orderLogStatus = new OrderLogStatus(order.getState(), OrderState.DELIVERED.label, LocalDateTime.now());
 
         order.setState(OrderState.DELIVERED.label);
+
         orderPersistencePort.updateOrder(order);
+
+        OrderLogModel orderLogModel = new OrderLogModel((long) order.getId(), (long) userId, (long) order.getUserId(), List.of(orderLogStatus));
+        orderLogsClientPort.logOrderStatusChange(orderLogModel);
     }
 
     @Override
@@ -134,24 +107,34 @@ public class OrderUseCase implements IOrderServicePort {
             throw new InvalidOrderActionException();
         }
 
+        OrderLogStatus orderLogStatus = new OrderLogStatus(currentOrder.getState(), OrderState.CANCELED.label, LocalDateTime.now());
         currentOrder.setState(OrderState.CANCELED.label);
         orderPersistencePort.updateOrder(currentOrder);
+        logOrderStatusChange(currentOrder.getId(), 0, (long) customerId, orderLogStatus);
     }
 
     @Override
     public List<OrderModel> getOrders(int page, int size, String state, int employeeId) {
-
-        if (page < 0 || size <= 0) {
-            throw new IllegalArgumentException();
-        }
+        validatePaginationParameters(page, size);
 
         RestaurantEmployeeModel employee = restaurantEmployeePersistencePort.findByUserId(employeeId);
-
-        if (employee == null) {
-            throw new UserNotFoundException();
-        }
+        validateEmployee(employee);
 
         return orderPersistencePort.getOrders(employee.getRestaurantId(), page, size, state);
+    }
+
+
+    private void createAndSaveOrder(OrderModel order) {
+        order.setDate(LocalDateTime.now());
+        order.setState(OrderState.PENDING.label);
+        OrderModel savedOrder = orderPersistencePort.makeOrder(order);
+        logOrderStatusChange(savedOrder.getId(), 0, (long) order.getUserId(), new OrderLogStatus(null, OrderState.PENDING.label, LocalDateTime.now()));
+    }
+
+    private void validatePaginationParameters(int page, int size) {
+        if (page < 0 || size <= 0) {
+            throw new IllegalArgumentException("Invalid page or size parameters.");
+        }
     }
 
     private void validateEmployee(RestaurantEmployeeModel employee) {
@@ -160,16 +143,66 @@ public class OrderUseCase implements IOrderServicePort {
         }
     }
 
-    private void validateOrderState(OrderModel order) {
+    private void validateOrderStateAndRestaurant(OrderModel order, int employeeRestaurantId) {
+        if (order == null) {
+            throw new OrderNotFoundException();
+        }
         if (!OrderState.PENDING.label.equals(order.getState())) {
             throw new OrderInProcessException();
         }
-    }
-
-    private void validateSameRestaurant(OrderModel order, RestaurantEmployeeModel employee) {
-        if (order.getRestaurantId() != employee.getRestaurantId()) {
+        if (order.getRestaurantId() != employeeRestaurantId) {
             throw new InvalidUserException();
         }
     }
 
+    private void validateOrderCompletion(OrderModel order, int employeeId) {
+        if (order == null) {
+            throw new OrderNotFoundException();
+        }
+        if (order.getChefId() != employeeId) {
+            throw new InvalidUserException();
+        }
+        Set<String> invalidStates = Set.of(OrderState.DONE.label, OrderState.DELIVERED.label);
+        if (invalidStates.contains(order.getState())) {
+            throw new InvalidOrderActionException();
+        }
+    }
+
+    private void validateOrderDelivery(OrderModel order, int userId, String securityPin) {
+        if (order == null) {
+            throw new OrderNotFoundException();
+        }
+        if (order.getChefId() != userId) {
+            throw new InvalidUserException();
+        }
+        if (!OrderState.DONE.label.equals(order.getState())) {
+            throw new InvalidOrderActionException();
+        }
+        if (OrderState.DELIVERED.label.equals(order.getState())) {
+            throw new InvalidOrderActionException();
+        }
+        if (!order.getPin().equals(securityPin)) {
+            throw new WrongCredentialsException();
+        }
+    }
+
+    private String generateAndSetPin(OrderModel order) {
+        String securityPin = String.format("%04d", random.nextInt(10000));
+        order.setState(OrderState.DONE.label);
+        order.setPin(securityPin);
+        return securityPin;
+    }
+
+    private void sendNotificationToUser(int userId, String securityPin) {
+        String userPhone = authClientPort.getUserById(String.valueOf(userId)).getPhone();
+        notificationPort.sendNotification(
+                userPhone.trim(),
+                "Your order is ready the security pin is: " + securityPin
+        );
+    }
+
+    private void logOrderStatusChange(long orderId, Integer employeeId, long userId, OrderLogStatus status) {
+        OrderLogModel orderLogModel = new OrderLogModel(orderId, (long) employeeId, userId, List.of(status));
+        orderLogsClientPort.logOrderStatusChange(orderLogModel);
+    }
 }
