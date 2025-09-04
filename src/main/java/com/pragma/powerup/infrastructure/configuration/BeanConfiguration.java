@@ -19,6 +19,7 @@ public class BeanConfiguration {
     private final IRestaurantRepository restaurantRepository;
     private final IRestaurantEntityMapper restaurantEntityMapper;
     private final IUserAuthClientPort userAuthClientPort;
+    private final IOrderLogsClientPort orderLogsClientPort;
     private final IDishRepository dishRepository;
     private final IDishEntityMapper dishEntityMapper;
     private final ICategoryRepository categoryRepository;
@@ -74,7 +75,7 @@ public class BeanConfiguration {
 
     @Bean
     public IOrderServicePort orderServicePort() {
-        return new OrderUseCase(orderPersistencePort(),restaurantEmployeePersistencePort(),notificationPort(),userAuthClientPort);
+        return new OrderUseCase(orderPersistencePort(),restaurantEmployeePersistencePort(),notificationPort(),userAuthClientPort,orderLogsClientPort);
     }
 
     @Bean

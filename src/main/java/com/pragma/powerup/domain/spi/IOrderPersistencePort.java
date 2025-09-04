@@ -5,7 +5,7 @@ import com.pragma.powerup.domain.model.OrderModel;
 import java.util.List;
 
 public interface IOrderPersistencePort {
-    void makeOrder(OrderModel orderModel);
+    OrderModel makeOrder(OrderModel orderModel);
 
     void updateOrder(OrderModel orderModel);
 
