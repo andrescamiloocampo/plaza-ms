@@ -16,5 +16,6 @@ public class OrderLogModel {
     private Long orderId;
     private Long chefId;
     private Long customerId;
+    private Long restaurantId;
     private List<OrderLogStatus> statusChanges;
 }

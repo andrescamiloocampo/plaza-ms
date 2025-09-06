@@ -61,7 +61,7 @@ public class OrderUseCase implements IOrderServicePort {
         order.setChefId(employeeId);
 
         orderPersistencePort.updateOrder(order);
-        logOrderStatusChange(order.getId(), employeeId, order.getUserId(), orderLogStatus);
+        logOrderStatusChange(order.getId(), order.getRestaurantId(), employeeId, order.getUserId(), orderLogStatus);
     }
 
     @Override
@@ -77,7 +77,7 @@ public class OrderUseCase implements IOrderServicePort {
 
         sendNotificationToUser(order.getUserId(), securityPin);
 
-        logOrderStatusChange(order.getId(), employeeId, order.getUserId(), orderLogStatus);
+        logOrderStatusChange(order.getId(), order.getRestaurantId(), employeeId, order.getUserId(), orderLogStatus);
     }
 
     @Override
@@ -91,7 +91,7 @@ public class OrderUseCase implements IOrderServicePort {
 
         orderPersistencePort.updateOrder(order);
 
-        OrderLogModel orderLogModel = new OrderLogModel((long) order.getId(), (long) userId, (long) order.getUserId(), List.of(orderLogStatus));
+        OrderLogModel orderLogModel = new OrderLogModel((long) order.getId(), (long) userId, (long) order.getUserId(), (long) order.getRestaurantId(), List.of(orderLogStatus));
         orderLogsClientPort.logOrderStatusChange(orderLogModel);
     }
 
@@ -110,7 +110,7 @@ public class OrderUseCase implements IOrderServicePort {
         OrderLogStatus orderLogStatus = new OrderLogStatus(currentOrder.getState(), OrderState.CANCELED.label, LocalDateTime.now());
         currentOrder.setState(OrderState.CANCELED.label);
         orderPersistencePort.updateOrder(currentOrder);
-        logOrderStatusChange(currentOrder.getId(), 0, (long) customerId, orderLogStatus);
+        logOrderStatusChange(currentOrder.getId(), currentOrder.getRestaurantId(), 0, customerId, orderLogStatus);
     }
 
     @Override
@@ -128,7 +128,7 @@ public class OrderUseCase implements IOrderServicePort {
         order.setDate(LocalDateTime.now());
         order.setState(OrderState.PENDING.label);
         OrderModel savedOrder = orderPersistencePort.makeOrder(order);
-        logOrderStatusChange(savedOrder.getId(), 0, (long) order.getUserId(), new OrderLogStatus(null, OrderState.PENDING.label, LocalDateTime.now()));
+        logOrderStatusChange(savedOrder.getId(), order.getRestaurantId(), 0, order.getUserId(), new OrderLogStatus(null, OrderState.PENDING.label, LocalDateTime.now()));
     }
 
     private void validatePaginationParameters(int page, int size) {
@@ -201,8 +201,8 @@ public class OrderUseCase implements IOrderServicePort {
         );
     }
 
-    private void logOrderStatusChange(long orderId, Integer employeeId, long userId, OrderLogStatus status) {
-        OrderLogModel orderLogModel = new OrderLogModel(orderId, (long) employeeId, userId, List.of(status));
+    private void logOrderStatusChange(long orderId, Integer restaurantId, Integer employeeId, long userId, OrderLogStatus status) {
+        OrderLogModel orderLogModel = new OrderLogModel(orderId, (long) employeeId, userId, (long) restaurantId, List.of(status));
         orderLogsClientPort.logOrderStatusChange(orderLogModel);
     }
 }
