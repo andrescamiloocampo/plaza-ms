@@ -13,5 +13,6 @@ public class OrderLogRequestDto {
     private Long orderId;
     private Long chefId;
     private Long customerId;
+    private Long restaurantId;
     private List<OrderStatusRequestDto> statusChanges;
 }
