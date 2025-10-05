@@ -3,7 +3,7 @@ package com.pragma.powerup.infrastructure.out.jpa.specification;
 import com.pragma.powerup.infrastructure.out.jpa.entity.DishEntity;
 import org.springframework.data.jpa.domain.Specification;
 
-import jakarta.persistence.criteria.Predicate;
+import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
 

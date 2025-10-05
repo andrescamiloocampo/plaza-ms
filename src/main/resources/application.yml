@@ -1,11 +1,10 @@
 server:
-  port: 8080
+  port: 8082
 
 spring:
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:mysql://localhost:3306/plaza
+    username: root
 
   jpa:
     hibernate:
@@ -19,23 +18,23 @@ spring:
 user:
   auth:
     service:
-      url: ${USERS_SERVICE}
+      url: http://localhost:8081/api/v1
 
 order:
   logs:
     service:
-      url: ${TRACEABILITY_SERVICE}
+      url: http://localhost:8083/api/v1
 
 twilio:
-  account-sid: ${TWILIO_ACCOUNT_SID}
-  auth-token: ${TWILIO_AUTH_TOKEN}
-  phone-number: ${PHONE_NUMBER}
-  messaging-service-sid: ${MESSAGING_SERVICE_SID}
+  account-sid:
+  auth-token:
+  phone-number:
+  messaging-service-sid:
 
 application:
   security:
     jwt:
-      secret-key: ${SECRET_KEY:DnkM6Yeq/oVtI4WHmTHqCUSpFZ4eNvPqI7xnsq1upr4=}
+      secret-key: DnkM6Yeq/oVtI4WHmTHqCUSpFZ4eNvPqI7xnsq1upr4=
       expiration: 86400000
       refresh-token:
         expiration: 604800000
