@@ -24,16 +24,17 @@ public class SecurityConfig {
         http
                 .csrf().disable()
                 .authorizeHttpRequests(auth -> auth
-                        .antMatchers("/api/v1/restaurants/**").authenticated()
-                        .antMatchers("/api/v1/dishes/**","/api/v1/employees/**").hasAuthority("OWNER")
-                        .antMatchers("/api/v1/orders/**").hasAnyAuthority("EMPLOYEE","OWNER","CUSTOMER","ADMIN")
-                        .antMatchers("/swagger-ui/**","/v3/api-docs/**").permitAll()
+                        .requestMatchers("/api/v1/restaurants/**").authenticated()
+                        .requestMatchers("/api/v1/dishes/**","/api/v1/employees/**").hasAuthority("OWNER")
+                        .requestMatchers("/api/v1/orders/**").hasAnyAuthority("EMPLOYEE","OWNER","CUSTOMER","ADMIN")
+                        .requestMatchers("/swagger-ui/**","/v3/api-docs/**").permitAll()
 
                         .anyRequest().authenticated()
                 )
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }
