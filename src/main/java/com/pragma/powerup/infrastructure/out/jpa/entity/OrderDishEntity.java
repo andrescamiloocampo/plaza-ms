@@ -1,11 +1,11 @@
 package com.pragma.powerup.infrastructure.out.jpa.entity;
 
+import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
 
 @Entity
 @Table(name = "order_dish")
