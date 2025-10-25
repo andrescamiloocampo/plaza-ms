@@ -28,23 +28,26 @@ public class DishJpaAdapter implements IDishPersistencePort {
 
     @Override
     public void updateDish(int id, DishPartialUpdateDto dishPartialUpdateDTO) {
-        DishModel dishModel = dishEntityMapper.toDishModel(dishRepository.findById(id).orElseThrow(NoDataFoundException::new));
-        if (dishModel != null) {
-            if (dishPartialUpdateDTO.getDescription() != null) {
-                dishModel.setDescription(dishPartialUpdateDTO.getDescription());
-            }
-            if (dishPartialUpdateDTO.getPrice() != null) {
-                dishModel.setPrice(dishPartialUpdateDTO.getPrice());
-            }
+        DishEntity dishEntity = dishRepository.findById(id)
+                .orElseThrow(NoDataFoundException::new);
+
+        if (dishPartialUpdateDTO.getDescription() != null) {
+            dishEntity.setDescription(dishPartialUpdateDTO.getDescription());
         }
-        dishRepository.save(dishEntityMapper.toEntity(dishModel));
+        if (dishPartialUpdateDTO.getPrice() != null) {
+            dishEntity.setPrice(dishPartialUpdateDTO.getPrice());
+        }
+
+        dishRepository.save(dishEntity);
     }
 
     @Override
     public void updateDishState(int id, boolean state) {
-        DishModel dishModel = dishEntityMapper.toDishModel(dishRepository.findById(id).orElseThrow(NoDataFoundException::new));
-        dishModel.setActive(state);
-        dishRepository.save(dishEntityMapper.toEntity(dishModel));
+        DishEntity dishEntity = dishRepository.findById(id)
+                .orElseThrow(NoDataFoundException::new);
+
+        dishEntity.setActive(state);
+        dishRepository.save(dishEntity);
     }
 
     @Override

@@ -20,6 +20,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/restaurants")
 @AllArgsConstructor
+@CrossOrigin("*")
 public class RestaurantRestController {
     private final IRestaurantHandler restaurantHandler;
     private final IRestaurantResponseMapper restaurantResponseMapper;
