@@ -6,6 +6,8 @@ import com.pragma.powerup.infrastructure.out.jpa.mapper.IRestaurantEmployeeEntit
 import com.pragma.powerup.infrastructure.out.jpa.repository.IRestaurantEmployeeRepository;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 public class RestaurantEmployeeJpaAdapter implements IRestaurantEmployeePersistencePort {
 
@@ -14,7 +16,14 @@ public class RestaurantEmployeeJpaAdapter implements IRestaurantEmployeePersiste
 
     @Override
     public void assignEmployeeToRestaurant(RestaurantEmployeeModel restaurantEmployeeModel) {
-        restaurantEmployeeRepository.save(restaurantEmployeeEntityMapper.toEntity(restaurantEmployeeModel));
+        RestaurantEmployeeModel existingAssignment = findByUserId(restaurantEmployeeModel.getUserId());
+        if (existingAssignment != null) {
+            existingAssignment.setActive(restaurantEmployeeModel.isActive());
+            existingAssignment.setRestaurantId(restaurantEmployeeModel.getRestaurantId());
+            restaurantEmployeeRepository.save(restaurantEmployeeEntityMapper.toEntity(existingAssignment));
+        } else {
+            restaurantEmployeeRepository.save(restaurantEmployeeEntityMapper.toEntity(restaurantEmployeeModel));
+        }
     }
 
     @Override
@@ -23,5 +32,11 @@ public class RestaurantEmployeeJpaAdapter implements IRestaurantEmployeePersiste
                 .toModel(restaurantEmployeeRepository
                         .findByUserIdAndActiveTrue(userId)
                         .orElse(null));
+    }
+
+    @Override
+    public List<RestaurantEmployeeModel> findAll() {
+        return restaurantEmployeeEntityMapper
+                .toModelList(restaurantEmployeeRepository.findAll());
     }
 }

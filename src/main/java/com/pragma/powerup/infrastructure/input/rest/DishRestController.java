@@ -3,6 +3,7 @@ package com.pragma.powerup.infrastructure.input.rest;
 import com.pragma.powerup.application.dto.request.DishPartialUpdateDto;
 import com.pragma.powerup.application.dto.request.DishRequestDto;
 import com.pragma.powerup.application.dto.response.DishResponseDto;
+import com.pragma.powerup.application.dto.response.PaginatedDishResponseDto;
 import com.pragma.powerup.application.handler.impl.DishHandler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -48,6 +49,20 @@ public class DishRestController {
                                                            @RequestParam(name = "category", defaultValue = "", required = false) String category
     ) {
         return ResponseEntity.ok(dishHandler.getDishes(restaurantId, page, size, category));
+    }
+
+    @GetMapping("/paginated")
+    @Operation(summary = "Find dishes paginated by restaurant and category with pagination stats")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successful petition", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Bad request, illegal arguments provided", content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden authentication required", content = @Content)
+    })
+    public ResponseEntity<PaginatedDishResponseDto> getPaginatedDishes(@RequestParam(name = "rid") int restaurantId,
+                                                                       @RequestParam(name = "page", defaultValue = "0") int page,
+                                                                       @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(dishHandler.getDishesPaginated(restaurantId,page,size));
     }
 
     @PutMapping("/{id}")

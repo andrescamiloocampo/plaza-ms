@@ -3,6 +3,7 @@ package com.pragma.powerup.application.handler.impl;
 import com.pragma.powerup.application.dto.request.DishPartialUpdateDto;
 import com.pragma.powerup.application.dto.request.DishRequestDto;
 import com.pragma.powerup.application.dto.response.DishResponseDto;
+import com.pragma.powerup.application.dto.response.PaginatedDishResponseDto;
 import com.pragma.powerup.application.handler.IDishHandler;
 import com.pragma.powerup.application.mapper.request.IDishRequestMapper;
 import com.pragma.powerup.application.mapper.response.IDishResponseMapper;
@@ -40,5 +41,10 @@ public class DishHandler implements IDishHandler {
     @Override
     public List<DishResponseDto> getDishes(int restaurantId, int page, int size, String category) {
         return dishResponseMapper.toResponseList(dishServicePort.getDishes(restaurantId, page, size, category));
+    }
+
+    @Override
+    public PaginatedDishResponseDto getDishesPaginated(int restaurantId, int page, int size) {
+        return dishResponseMapper.toPaginatedResponse(dishServicePort.getPaginatedDishes(restaurantId,page,size));
     }
 }

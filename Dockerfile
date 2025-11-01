@@ -9,9 +9,11 @@ COPY settings.gradle .
 
 COPY src src
 
-RUN chmod +x gradlew
+RUN apt-get update && apt-get install -y dos2unix \
+    && dos2unix gradlew \
+    && chmod +x gradlew
 
-RUN ./gradlew bootJar -x test
+RUN sh ./gradlew bootJar -x test
 
 FROM eclipse-temurin:17-jre-focal
 

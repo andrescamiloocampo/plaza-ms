@@ -2,6 +2,7 @@ package com.pragma.powerup.infrastructure.out.jpa.adapter;
 
 import com.pragma.powerup.application.dto.request.DishPartialUpdateDto;
 import com.pragma.powerup.domain.model.DishModel;
+import com.pragma.powerup.domain.model.PaginatedDishModel;
 import com.pragma.powerup.domain.spi.IDishPersistencePort;
 import com.pragma.powerup.infrastructure.exception.NoDataFoundException;
 import com.pragma.powerup.infrastructure.out.jpa.entity.DishEntity;
@@ -60,5 +61,18 @@ public class DishJpaAdapter implements IDishPersistencePort {
         Pageable pageable = PageRequest.of(page, size);
         Specification<DishEntity> spec = DishSpecification.withFilters(restaurantId, category);
         return dishEntityMapper.toDishModelList(dishRepository.findAll(spec, pageable).getContent());
+    }
+
+    @Override
+    public PaginatedDishModel getPaginatedDishes(int restaurantId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Specification<DishEntity> spec = DishSpecification.withFilters(restaurantId, "");
+        List<DishModel> dishes = dishEntityMapper.toDishModelList(dishRepository.findAll(spec, pageable).getContent());
+        long totalDishes = dishRepository.count(spec);
+        return PaginatedDishModel.builder()
+                .dishes(dishes)
+                .totalItems(totalDishes)
+                .totalPages((int) Math.ceil((double) totalDishes / size))
+                .build();
     }
 }

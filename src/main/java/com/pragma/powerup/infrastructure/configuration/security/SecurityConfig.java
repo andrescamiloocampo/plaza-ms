@@ -29,6 +29,7 @@ public class SecurityConfig {
                 .disable()
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.GET, "/api/v1/dishes/**").authenticated()
+                        .requestMatchers("api/v1/categories/**").authenticated()
                         .requestMatchers("/api/v1/dishes/**").hasAuthority("OWNER")
                         .requestMatchers("/api/v1/restaurants/**").authenticated()
                         .requestMatchers("/api/v1/employees/**").hasAuthority("OWNER")

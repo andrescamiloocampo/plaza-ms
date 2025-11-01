@@ -23,6 +23,7 @@ public class BeanConfiguration {
     private final IDishRepository dishRepository;
     private final IDishEntityMapper dishEntityMapper;
     private final ICategoryRepository categoryRepository;
+    private final ICategoryEntityMapper categoryEntityMapper;
     private final IOrderRepository orderRepository;
     private final IOrderEntityMapper orderEntityMapper;
     private final IRestaurantEmployeeRepository restaurantEmployeeRepository;
@@ -30,7 +31,7 @@ public class BeanConfiguration {
 
     @Bean
     public ICategoryPersistencePort categoryPersistencePort() {
-        return new CategoryJpaAdapter(categoryRepository);
+        return new CategoryJpaAdapter(categoryRepository,categoryEntityMapper);
     }
 
     @Bean
@@ -61,6 +62,11 @@ public class BeanConfiguration {
     @Bean
     public IDishServicePort dishServicePort() {
         return new DishUseCase(dishPersistencePort(), restaurantPersistencePort(), categoryPersistencePort());
+    }
+
+    @Bean
+    public ICategoryServicePort categoryServicePort() {
+        return new CategoryUseCase(categoryPersistencePort());
     }
 
     @Bean
