@@ -1,7 +1,3 @@
-Claro. Aquí tienes un manual técnico en formato markdown para la configuración y ejecución local de tu proyecto.
-
------
-
 # Manual Técnico de Configuración Local
 
 Este manual describe los pasos necesarios para configurar y ejecutar la pila completa del proyecto (tres microservicios de backend y un frontend) en un entorno de desarrollo local.
